@@ -1,0 +1,58 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "actions": "Acciones",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "all": "Todos",
+    "active": "Activos",
+    "inactive": "Inactivos",
+    "status": "Estado",
+    "export": "Exportar"
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión en tu cuenta para continuar",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "remember": "Recordarme",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes una cuenta?",
+      "register": "Regístrate"
+    },
+    "register": {
+      "title": "Crear nueva cuenta",
+      "subtitle": "Completa tu información para comenzar",
+      "fullName": "Nombre completo",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "login": "Iniciar sesión"
+    },
+    "forgot": {
+      "title": "Recuperar contraseña",
+      "subtitle": "Ingresa tu correo para recibir instrucciones",
+      "email": "Correo electrónico",
+      "submit": "Enviar instrucciones",
+      "back": "Volver al inicio de sesión",
+      "success": "¡Correo enviado! Revisa tu bandeja de entrada para restablecer tu contraseña",
+      "tryAgain": "Intentar de nuevo"
+    }
+  },
+  "languages": {
+    "en": "Inglés",
+    "pt": "Portugués",
+    "es": "Español"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "actions": "Ações",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "all": "Todos",
+    "active": "Ativos",
+    "inactive": "Inativos",
+    "status": "Status",
+    "export": "Exportar"
+  },
+  "auth": {
+    "login": {
+      "title": "Bem-vindo de volta",
+      "subtitle": "Entre com sua conta para continuar",
+      "email": "Email",
+      "password": "Senha",
+      "remember": "Lembrar-me",
+      "forgot": "Esqueceu sua senha?",
+      "submit": "Entrar",
+      "noAccount": "Ainda não tem uma conta?",
+      "register": "Cadastre-se"
+    },
+    "register": {
+      "title": "Criar nova conta",
+      "subtitle": "Preencha os dados para começar",
+      "fullName": "Nome completo",
+      "email": "Email",
+      "password": "Senha",
+      "confirmPassword": "Confirmar senha",
+      "submit": "Criar conta",
+      "hasAccount": "Já tem uma conta?",
+      "login": "Fazer login"
+    },
+    "forgot": {
+      "title": "Recuperar senha",
+      "subtitle": "Digite seu email para receber as instruções de recuperação",
+      "email": "Email",
+      "submit": "Enviar instruções",
+      "back": "Voltar para o login",
+      "success": "Email enviado! Verifique sua caixa de entrada para redefinir sua senha",
+      "tryAgain": "Tentar novamente"
+    }
+  },
+  "languages": {
+    "en": "Inglês",
+    "pt": "Português",
+    "es": "Espanhol"
+  }
+}
