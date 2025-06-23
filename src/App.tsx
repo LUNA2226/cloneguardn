@@ -13,22 +13,27 @@ import { ForgotPasswordPage } from './components/pages/auth/ForgotPasswordPage';
 import { SubscriptionPage } from './components/pages/SubscriptionPage';
 import { PricingPage } from './components/pages/PricingPage';
 import { CancelSubscriptionPage } from './components/pages/CancelSubscriptionPage';
+import { ManageSubscriptionPage } from './components/pages/ManageSubscriptionPage';
 import { RealTimePage } from './components/pages/RealTimePage';
 import { TermsPage } from './components/pages/TermsPage';
 import { PrivacyPage } from './components/pages/PrivacyPage';
 import { TutorialsPage } from './components/pages/TutorialsPage';
+
 export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authScreen, setAuthScreen] = useState('login');
   const [activeScreen, setActiveScreen] = useState('dashboard');
   const [selectedDomain, setSelectedDomain] = useState(null);
+
   const handleLogin = () => {
     setIsAuthenticated(true);
   };
+
   const handleViewActions = domain => {
     setSelectedDomain(domain);
     setActiveScreen('actions');
   };
+
   // If not authenticated, show auth screens
   if (!isAuthenticated) {
     switch (authScreen) {
@@ -41,11 +46,13 @@ export function App() {
         return <LoginPage onRegister={() => setAuthScreen('register')} onForgotPassword={() => setAuthScreen('forgot-password')} onLogin={handleLogin} />;
     }
   }
+
   // If authenticated, show main app
   return <div className="flex h-screen bg-gray-900 text-white">
       <Sidebar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
       <main className="flex-1 overflow-auto">{renderScreen()}</main>
     </div>;
+
   function renderScreen() {
     switch (activeScreen) {
       case 'dashboard':
@@ -60,10 +67,12 @@ export function App() {
         return <Settings />;
       case 'subscription':
         return <PricingPage setActiveScreen={setActiveScreen} />;
+      case 'manage-subscription':
+        return <ManageSubscriptionPage setActiveScreen={setActiveScreen} />;
       case 'add-domain':
         return <AddDomainPage onBack={() => setActiveScreen('dashboard')} />;
       case 'cancel-subscription':
-        return <CancelSubscriptionPage onBack={() => setActiveScreen('subscription')} />;
+        return <CancelSubscriptionPage onBack={() => setActiveScreen('manage-subscription')} />;
       case 'realtime':
         return <RealTimePage />;
       case 'terms':

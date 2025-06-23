@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { cn } from '../../utils/cn';
 import { motion } from 'framer-motion';
+
 const plans = [{
   name: 'STARTER',
   price: '99',
@@ -36,12 +37,14 @@ const plans = [{
   href: '#',
   isPopular: false
 }];
+
 export function PricingPage({
   setActiveScreen
 }) {
   const [isYearly, setIsYearly] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const switchRef = useRef<HTMLButtonElement>(null);
+
   const handleToggle = () => {
     setIsYearly(!isYearly);
     if (!isYearly && switchRef.current) {
@@ -64,6 +67,7 @@ export function PricingPage({
       });
     }
   };
+
   return <div className="p-6">
       {/* Current Plan Summary */}
       <div className="mb-12 bg-gray-800 rounded-lg p-6">
@@ -83,11 +87,15 @@ export function PricingPage({
               </div>
             </div>
           </div>
-          <button onClick={() => setActiveScreen('cancel-subscription')} className="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+          <button 
+            onClick={() => setActiveScreen('manage-subscription')} 
+            className="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+          >
             Gerenciar Pagamento
           </button>
         </div>
       </div>
+
       <div className="text-center space-y-4 mb-12">
         <h2 className="text-4xl font-bold tracking-tight">Escolha seu Plano</h2>
         <p className="text-gray-400 text-lg">
@@ -95,6 +103,7 @@ export function PricingPage({
           proteção e suporte dedicado
         </p>
       </div>
+
       <div className="flex justify-center mb-10">
         <div className="flex items-center gap-3">
           <span className={`font-semibold ${!isYearly ? 'text-cyan-400' : 'text-gray-400'}`}>
@@ -110,6 +119,7 @@ export function PricingPage({
           </span>
         </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {plans.map((plan, index) => <motion.div key={index} initial={{
         y: 50,
