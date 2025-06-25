@@ -42,14 +42,9 @@ export function CancelSubscriptionPage({
           Are you sure you want to cancel your subscription?
         </p>
         
-        <div className="flex space-x-4">
-          <button onClick={onBack} className="flex-1 py-3 px-6 rounded-xl font-semibold bg-gray-700 text-gray-300 hover:bg-gray-600 transition-all duration-300">
-            Keep Plan
-          </button>
-          <button onClick={handleCancel} className="flex-1 py-3 px-6 rounded-xl font-semibold bg-red-600 text-white hover:bg-red-500 transition-all duration-300">
-            Cancel Plan
-          </button>
-        </div>
+        <button onClick={handleCancel} className="w-full py-3 px-6 rounded-xl font-semibold bg-red-600 text-white hover:bg-red-500 transition-all duration-300">
+          Cancel Plan
+        </button>
       </div>
     </div>
   );
