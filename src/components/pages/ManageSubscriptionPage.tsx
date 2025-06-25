@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeftIcon, ShieldIcon, CreditCardIcon, AlertTriangleIcon } from 'lucide-react';
+import { ArrowLeftIcon, ShieldIcon, CreditCardIcon } from 'lucide-react';
 
 interface ManageSubscriptionPageProps {
   setActiveScreen: (screen: string) => void;
@@ -8,10 +8,6 @@ interface ManageSubscriptionPageProps {
 export function ManageSubscriptionPage({ setActiveScreen }: ManageSubscriptionPageProps) {
   const handleCancelSubscription = () => {
     setActiveScreen('cancel-subscription');
-  };
-
-  const handleKeepSubscription = () => {
-    setActiveScreen('subscription');
   };
 
   const handleUpdatePaymentMethod = () => {
@@ -76,34 +72,11 @@ export function ManageSubscriptionPage({ setActiveScreen }: ManageSubscriptionPa
           </button>
         </div>
 
-        {/* Cancellation Warning */}
-        <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-6 mb-8">
-          <div className="flex items-start space-x-3">
-            <AlertTriangleIcon className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-yellow-400 font-semibold mb-2">
-                Cancellation considerations
-              </h4>
-              <p className="text-yellow-200 text-sm leading-relaxed">
-                By canceling, you will lose access to PRO features at the end of your current 
-                billing cycle. Your protected domains may become vulnerable.
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button 
-            onClick={handleKeepSubscription}
-            className="flex-1 py-3 px-6 bg-gray-700 text-gray-300 rounded-xl font-semibold hover:bg-gray-600 transition-all duration-300"
-          >
-            Keep Subscription
-          </button>
-          
+        <div className="flex justify-center">
           <button 
             onClick={handleCancelSubscription}
-            className="flex-1 py-3 px-6 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-500 transition-all duration-300"
+            className="py-3 px-6 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-500 transition-all duration-300"
           >
             Cancel Subscription
           </button>
