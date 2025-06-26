@@ -12,18 +12,22 @@ const plans = [
   {
     name: 'STARTER',
     price: '99',
-    yearlyPrice: '79',
+    yearlyPrice: '79.20', // $950.40 / 12 months
+    yearlyTotal: '950.40',
     period: 'per month',
     features: ['3 domínios protegidos', 'Proteção básica', 'Detecção em tempo real', 'Notificação', 'Suporte 24/7'],
     description: 'Ideal para pequenos negócios e profissionais',
     buttonText: 'Mudar Plano',
     href: '#',
-    isPopular: false
+    isPopular: false,
+    monthlyPriceId: 'price_1RY6fOBTJG4VGXggqEnGb9AC',
+    yearlyPriceId: 'price_1RY79vBTJG4VGXggb0jIuSlb'
   },
   {
     name: 'PRO',
-    price: '99',
-    yearlyPrice: '79',
+    price: '299',
+    yearlyPrice: '239.20', // $2870.40 / 12 months
+    yearlyTotal: '2870.40',
     period: 'per month',
     features: ['25 domínios protegidos', 'Tudo do Starter', 'Proteção avançada (camadas extras de verificação)', 'Notificação', 'Suporte prioritário', 'Integração com Google Analytics'],
     description: 'Perfeito para empresas em crescimento',
@@ -31,18 +35,22 @@ const plans = [
     href: '#',
     isPopular: true,
     isCurrent: false,
-    priceId: 'price_1RY6fOBTJG4VGXggqEnGb9AC'
+    monthlyPriceId: 'price_1RYCNsBTJG4VGXggJZpwo0p2',
+    yearlyPriceId: 'price_1RYCX2BTJG4VGXggJcMOpUlJ'
   },
   {
     name: 'ENTERPRISE',
     price: '499',
-    yearlyPrice: '399',
+    yearlyPrice: '399.20', // $4790.40 / 12 months
+    yearlyTotal: '4790.40',
     period: 'per month',
     features: ['100 domínios protegidos', 'Tudo do Pro', 'Proteção multi-camada', 'Alertas em tempo real', 'Suporte prioritário'],
     description: 'Para grandes empresas com necessidades específicas',
     buttonText: 'Mudar Plano',
     href: '#',
-    isPopular: false
+    isPopular: false,
+    monthlyPriceId: 'price_1RYCayBTJG4VGXggawM974zG',
+    yearlyPriceId: 'price_1RYCeYBTJG4VGXggpVTc34Qv'
   }
 ];
 
@@ -77,13 +85,15 @@ export function PricingPage({ setActiveScreen }) {
   };
 
   const handleSubscribe = async (plan: any) => {
-    if (!plan.priceId || loadingPlan) return;
+    const priceId = isYearly ? plan.yearlyPriceId : plan.monthlyPriceId;
+    
+    if (!priceId || loadingPlan) return;
 
     setLoadingPlan(plan.name);
 
     try {
       const { url } = await createCheckoutSession({
-        price_id: plan.priceId,
+        price_id: priceId,
         success_url: `${window.location.origin}?success=true`,
         cancel_url: `${window.location.origin}?canceled=true`,
         mode: 'subscription'
@@ -102,7 +112,8 @@ export function PricingPage({ setActiveScreen }) {
 
   // Update plans with current subscription status
   const updatedPlans = plans.map(plan => {
-    const isCurrentPlan = subscription?.price_id === plan.priceId;
+    const isCurrentPlan = subscription?.price_id === plan.monthlyPriceId || 
+                         subscription?.price_id === plan.yearlyPriceId;
     return {
       ...plan,
       isCurrent: isCurrentPlan,
@@ -245,15 +256,7 @@ export function PricingPage({ setActiveScreen }) {
                 </div>
                 {isYearly && (
                   <p className="text-xs text-cyan-400 mt-1">
-                    equivalente a $
-                    {isYearly
-                      ? plan.name === 'STARTER'
-                        ? '948'
-                        : plan.name === 'PRO'
-                        ? '948'
-                        : '4.788'
-                      : plan.yearlyPrice}
-                    /ano
+                    equivalente a ${plan.yearlyTotal}/ano
                   </p>
                 )}
                 <p className={`text-xs mt-1 ${plan.isPopular ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -273,7 +276,7 @@ export function PricingPage({ setActiveScreen }) {
               <div className="mt-8">
                 <button
                   onClick={() => handleSubscribe(plan)}
-                  disabled={plan.isCurrent || loadingPlan === plan.name || !plan.priceId}
+                  disabled={plan.isCurrent || loadingPlan === plan.name}
                   className={cn(
                     'w-full px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center',
                     plan.isCurrent
