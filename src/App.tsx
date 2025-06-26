@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './i18n'; // Add this line
+import './i18n';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClonesPage } from './components/pages/ClonesPage';
@@ -18,49 +18,124 @@ import { RealTimePage } from './components/pages/RealTimePage';
 import { TermsPage } from './components/pages/TermsPage';
 import { PrivacyPage } from './components/pages/PrivacyPage';
 import { TutorialsPage } from './components/pages/TutorialsPage';
+import { CheckoutSuccessPage } from './components/pages/CheckoutSuccessPage';
+import { supabase } from './lib/supabase';
 
 export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authScreen, setAuthScreen] = useState('login');
   const [activeScreen, setActiveScreen] = useState('dashboard');
   const [selectedDomain, setSelectedDomain] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Check for success/cancel parameters in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      setActiveScreen('checkout-success');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('canceled') === 'true') {
+      setActiveScreen('subscription');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
   };
 
-  const handleViewActions = domain => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setActiveScreen('dashboard');
+  };
+
+  const handleViewActions = (domain) => {
     setSelectedDomain(domain);
     setActiveScreen('actions');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   // If not authenticated, show auth screens
   if (!isAuthenticated) {
     switch (authScreen) {
       case 'register':
-        return <RegisterPage onLogin={() => setAuthScreen('login')} setActiveScreen={setActiveScreen} // Pass setActiveScreen
-        />;
+        return (
+          <RegisterPage
+            onLogin={() => setAuthScreen('login')}
+            setActiveScreen={setActiveScreen}
+          />
+        );
       case 'forgot-password':
         return <ForgotPasswordPage onBack={() => setAuthScreen('login')} />;
       default:
-        return <LoginPage onRegister={() => setAuthScreen('register')} onForgotPassword={() => setAuthScreen('forgot-password')} onLogin={handleLogin} />;
+        return (
+          <LoginPage
+            onRegister={() => setAuthScreen('register')}
+            onForgotPassword={() => setAuthScreen('forgot-password')}
+            onLogin={handleLogin}
+          />
+        );
     }
   }
 
   // If authenticated, show main app
-  return <div className="flex h-screen bg-gray-900 text-white">
-      <Sidebar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+  return (
+    <div className="flex h-screen bg-gray-900 text-white">
+      <Sidebar 
+        activeScreen={activeScreen} 
+        setActiveScreen={setActiveScreen}
+        onLogout={handleLogout}
+      />
       <main className="flex-1 overflow-auto">{renderScreen()}</main>
-    </div>;
+    </div>
+  );
 
   function renderScreen() {
     switch (activeScreen) {
       case 'dashboard':
-        return <Dashboard onViewActions={handleViewActions} onAddDomain={() => setActiveScreen('add-domain')} />;
+        return (
+          <Dashboard
+            onViewActions={handleViewActions}
+            onAddDomain={() => setActiveScreen('add-domain')}
+          />
+        );
       case 'clones':
         return <ClonesPage />;
       case 'actions':
-        return <ActionScreen domain={selectedDomain} onBack={() => setActiveScreen('clones')} />;
+        return (
+          <ActionScreen
+            domain={selectedDomain}
+            onBack={() => setActiveScreen('clones')}
+          />
+        );
       case 'domains':
         return <ProtectedDomains />;
       case 'settings':
@@ -72,7 +147,11 @@ export function App() {
       case 'add-domain':
         return <AddDomainPage onBack={() => setActiveScreen('dashboard')} />;
       case 'cancel-subscription':
-        return <CancelSubscriptionPage onBack={() => setActiveScreen('manage-subscription')} />;
+        return (
+          <CancelSubscriptionPage
+            onBack={() => setActiveScreen('manage-subscription')}
+          />
+        );
       case 'realtime':
         return <RealTimePage />;
       case 'terms':
@@ -81,8 +160,19 @@ export function App() {
         return <PrivacyPage onBack={() => setActiveScreen('dashboard')} />;
       case 'tutorials':
         return <TutorialsPage />;
+      case 'checkout-success':
+        return (
+          <CheckoutSuccessPage
+            onContinue={() => setActiveScreen('dashboard')}
+          />
+        );
       default:
-        return <Dashboard onViewActions={handleViewActions} />;
+        return (
+          <Dashboard
+            onViewActions={handleViewActions}
+            onAddDomain={() => setActiveScreen('add-domain')}
+          />
+        );
     }
   }
 }
