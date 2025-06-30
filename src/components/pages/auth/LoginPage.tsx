@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldIcon, EyeIcon, EyeOffIcon, MailIcon, CheckCircleIcon } from 'lucide-react';
+import { ShieldIcon, EyeIcon, EyeOffIcon, MailIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { LanguageSwitcher } from '../../LanguageSwitcher';
 import { supabase } from '../../../lib/supabase';
 
@@ -28,7 +28,7 @@ export function LoginPage({
 
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -66,17 +66,21 @@ export function LoginPage({
     } catch (err) {
       console.error('Login error:', err);
       
-      // Translate common error messages to English
+      // Provide more helpful error messages
       let errorMessage = err.message;
       
-      if (err.message.includes('Invalid login credentials')) {
-        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      if (err.message.includes('Invalid login credentials') || err.code === 'invalid_credentials') {
+        errorMessage = 'The email or password you entered is incorrect. Please check your credentials and try again, or use "Forgot your password?" if you need to reset it.';
       } else if (err.message.includes('Email not confirmed')) {
-        errorMessage = 'Email not confirmed. Please check your inbox and confirm your email.';
+        errorMessage = 'Please check your email inbox and click the confirmation link before signing in.';
       } else if (err.message.includes('Too many requests')) {
         errorMessage = 'Too many login attempts. Please wait a few minutes before trying again.';
       } else if (err.message.includes('User not found')) {
-        errorMessage = 'User not found. Please check your email or create a new account.';
+        errorMessage = 'No account found with this email address. Please check your email or create a new account.';
+      } else if (err.message.includes('signup_disabled')) {
+        errorMessage = 'Account registration is currently disabled. Please contact support.';
+      } else if (err.message.includes('email_address_invalid')) {
+        errorMessage = 'Please enter a valid email address.';
       }
       
       setError(errorMessage);
@@ -91,7 +95,7 @@ export function LoginPage({
     setResetError('');
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -106,9 +110,11 @@ export function LoginPage({
       let errorMessage = err.message;
       
       if (err.message.includes('User not found')) {
-        errorMessage = 'Email not found. Please check the email address or create a new account.';
+        errorMessage = 'No account found with this email address. Please check the email or create a new account.';
       } else if (err.message.includes('Email rate limit exceeded')) {
-        errorMessage = 'Email rate limit exceeded. Please wait a few minutes before trying again.';
+        errorMessage = 'Too many password reset requests. Please wait a few minutes before trying again.';
+      } else if (err.message.includes('email_address_invalid')) {
+        errorMessage = 'Please enter a valid email address.';
       }
       
       setResetError(errorMessage);
@@ -187,8 +193,9 @@ export function LoginPage({
             ) : (
               <>
                 {resetError && (
-                  <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm">
-                    {resetError}
+                  <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm flex items-start space-x-2">
+                    <AlertCircleIcon className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                    <span>{resetError}</span>
                   </div>
                 )}
 
@@ -238,8 +245,9 @@ export function LoginPage({
         {!showForgotPassword && (
           <>
             {error && (
-              <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm">
-                {error}
+              <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm flex items-start space-x-2">
+                <AlertCircleIcon className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -338,6 +346,17 @@ export function LoginPage({
                   Sign up
                 </button>
               </p>
+            </div>
+
+            {/* Help section for login issues */}
+            <div className="mt-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+              <h4 className="text-sm font-medium text-gray-300 mb-2">Having trouble signing in?</h4>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li>• Make sure your email and password are correct</li>
+                <li>• Check if you need to confirm your email first</li>
+                <li>• Use "Forgot your password?" to reset if needed</li>
+                <li>• Create a new account if you don't have one yet</li>
+              </ul>
             </div>
           </>
         )}
