@@ -46,8 +46,8 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      // Gerar ID único para o script
-      const scriptId = generateScriptId();
+      // Gerar ID único para o script (sem referências ao domínio)
+      const scriptId = generateObfuscatedId();
       
       // Salvar domínio protegido
       const { data: protectedDomain, error: insertError } = await supabase
@@ -68,13 +68,9 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      // Gerar script ofuscado
-      const obfuscatedScript = generateObfuscatedScript(scriptId, domain, settings);
-
       return new Response(
         JSON.stringify({
           scriptId,
-          script: obfuscatedScript,
           domain: protectedDomain
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -111,7 +107,7 @@ Deno.serve(async (req: Request) => {
       const scriptId = url.searchParams.get('scriptId');
 
       if (scriptId) {
-        // Retornar script principal
+        // Retornar script principal ofuscado
         const { data: domain } = await supabase
           .from('protected_domains')
           .select('domain, settings')
@@ -119,7 +115,7 @@ Deno.serve(async (req: Request) => {
           .single();
 
         if (!domain) {
-          return new Response('// Script not found', {
+          return new Response('', {
             headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
           });
         }
@@ -158,7 +154,8 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-function generateScriptId(): string {
+function generateObfuscatedId(): string {
+  // Gera ID completamente aleatório sem referências
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   for (let i = 0; i < 16; i++) {
@@ -167,19 +164,9 @@ function generateScriptId(): string {
   return result;
 }
 
-function generateObfuscatedScript(scriptId: string, domain: string, settings: any): string {
-  const randomPath = generateRandomPath();
-  const obfuscatedVars = generateObfuscatedVars();
-  
-  return `(function(){var ${obfuscatedVars.a}='${scriptId}',${obfuscatedVars.b}='${domain}';
-if(location.hostname===${obfuscatedVars.b}){var ${obfuscatedVars.c}=document.createElement('script');
-${obfuscatedVars.c}.src='${Deno.env.get('SUPABASE_URL')}/functions/v1/script-generator?scriptId='+${obfuscatedVars.a};
-${obfuscatedVars.c}.async=true;document.head.appendChild(${obfuscatedVars.c});}})();`;
-}
-
 function generateRandomPath(): string {
-  const paths = ['cdn', 'assets', 'static', 'js', 'lib', 'core'];
-  const files = ['p.js', 'a.js', 'c.js', 'main.js', 'app.js', 'core.js'];
+  const paths = ['assets', 'static', 'lib', 'core', 'js', 'cdn'];
+  const files = ['p.js', 'a.js', 'c.js', 'main.js', 'app.js', 'core.js', 'bundle.js'];
   return `/${paths[Math.floor(Math.random() * paths.length)]}/${files[Math.floor(Math.random() * files.length)]}`;
 }
 
@@ -187,9 +174,9 @@ function generateObfuscatedVars(): { [key: string]: string } {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   const vars: { [key: string]: string } = {};
   
-  ['a', 'b', 'c', 'd', 'e'].forEach(key => {
+  ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(key => {
     let varName = '';
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
       varName += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     vars[key] = varName;
@@ -199,46 +186,50 @@ function generateObfuscatedVars(): { [key: string]: string } {
 }
 
 function generateMainScript(scriptId: string, originalDomain: string, settings: any): string {
+  const obfVars = generateObfuscatedVars();
+  
   return `
 (function() {
   'use strict';
   
-  var config = {
-    scriptId: '${scriptId}',
-    originalDomain: '${originalDomain}',
-    settings: ${JSON.stringify(settings)},
-    apiUrl: '${Deno.env.get('SUPABASE_URL')}/functions/v1/script-tracker'
+  var ${obfVars.a} = {
+    ${obfVars.b}: '${scriptId}',
+    ${obfVars.c}: '${originalDomain}',
+    ${obfVars.d}: ${JSON.stringify(settings)},
+    ${obfVars.e}: '${Deno.env.get('SUPABASE_URL')}/functions/v1/script-tracker'
   };
   
-  var analytics = {
-    startTime: Date.now(),
-    pageViews: 0,
-    clicks: 0,
-    actions: []
+  var ${obfVars.f} = {
+    ${obfVars.g}: Date.now(),
+    pv: 0,
+    cl: 0,
+    ac: []
   };
   
-  function isClonedSite() {
-    return location.hostname !== config.originalDomain;
+  function ${obfVars.a}1() {
+    return location.hostname !== ${obfVars.a}.${obfVars.c};
   }
   
-  function sendAnalytics(eventType, data) {
-    fetch(config.apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        scriptId: config.scriptId,
-        eventType: eventType,
-        eventData: data,
-        domain: location.hostname,
-        url: location.href,
-        timestamp: Date.now()
-      })
-    }).catch(function() {});
+  function ${obfVars.a}2(t, d) {
+    try {
+      fetch(${obfVars.a}.${obfVars.e}, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scriptId: ${obfVars.a}.${obfVars.b},
+          eventType: t,
+          eventData: d,
+          domain: location.hostname,
+          url: location.href,
+          timestamp: Date.now()
+        })
+      }).catch(function() {});
+    } catch(e) {}
   }
   
-  function trackPageView() {
-    analytics.pageViews++;
-    sendAnalytics('page_view', {
+  function ${obfVars.a}3() {
+    ${obfVars.f}.pv++;
+    ${obfVars.a}2('page_view', {
       domain: location.hostname,
       url: location.href,
       referrer: document.referrer,
@@ -246,137 +237,159 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
     });
   }
   
-  function trackClick(event) {
-    analytics.clicks++;
-    sendAnalytics('click', {
-      element: event.target.tagName,
-      text: event.target.textContent?.substring(0, 100),
-      href: event.target.href || null
+  function ${obfVars.a}4(e) {
+    ${obfVars.f}.cl++;
+    ${obfVars.a}2('click', {
+      element: e.target.tagName,
+      text: e.target.textContent ? e.target.textContent.substring(0, 100) : '',
+      href: e.target.href || null
     });
   }
   
-  function addViewCounter() {
-    var counter = document.createElement('div');
-    counter.style.cssText = 'position:fixed;top:10px;right:10px;background:#000;color:#fff;padding:5px 10px;border-radius:3px;font-size:12px;z-index:999999;';
-    counter.textContent = 'Views: ' + analytics.pageViews;
-    document.body.appendChild(counter);
+  function ${obfVars.a}5() {
+    var ${obfVars.a}6 = document.createElement('div');
+    ${obfVars.a}6.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;z-index:999999;font-family:monospace;';
+    ${obfVars.a}6.textContent = 'Views: ' + ${obfVars.f}.pv;
+    document.body.appendChild(${obfVars.a}6);
     
     setInterval(function() {
-      counter.textContent = 'Views: ' + analytics.pageViews;
+      ${obfVars.a}6.textContent = 'Views: ' + ${obfVars.f}.pv;
     }, 1000);
   }
   
-  function redirectToOriginal() {
-    var redirectUrl = config.settings.redirect_url || 'https://' + config.originalDomain;
-    sendAnalytics('redirect', { from: location.href, to: redirectUrl });
-    location.href = redirectUrl;
+  function ${obfVars.a}7() {
+    var ${obfVars.a}8 = ${obfVars.a}.${obfVars.d}.redirect_url || 'https://' + ${obfVars.a}.${obfVars.c};
+    ${obfVars.a}2('redirect', { from: location.href, to: ${obfVars.a}8 });
+    setTimeout(function() {
+      location.href = ${obfVars.a}8;
+    }, Math.floor(Math.random() * 2000) + 1000);
   }
   
-  function applySabotage() {
-    var style = document.createElement('style');
-    style.textContent = \`
-      * { filter: blur(2px) !important; }
-      a { pointer-events: none !important; }
-      button { pointer-events: none !important; }
-      input { pointer-events: none !important; }
+  function ${obfVars.a}9() {
+    var ${obfVars.a}10 = document.createElement('style');
+    ${obfVars.a}10.textContent = \`
+      * { 
+        filter: blur(3px) contrast(0.5) !important; 
+        transition: all 0.3s ease !important;
+      }
+      a, button, input, select, textarea { 
+        pointer-events: none !important; 
+        cursor: not-allowed !important;
+      }
+      img { 
+        filter: grayscale(100%) blur(5px) !important; 
+      }
     \`;
-    document.head.appendChild(style);
+    document.head.appendChild(${obfVars.a}10);
     
     setTimeout(function() {
       document.body.style.transform = 'rotate(180deg)';
+      document.body.style.transition = 'transform 2s ease';
     }, 3000);
   }
   
-  function replaceLinks() {
-    var links = document.querySelectorAll('a[href]');
-    links.forEach(function(link) {
-      if (link.href.includes('checkout') || link.href.includes('buy') || link.href.includes('purchase')) {
-        link.href = config.settings.checkout_url || 'https://' + config.originalDomain;
-        link.style.border = '2px solid red';
+  function ${obfVars.a}11() {
+    var ${obfVars.a}12 = document.querySelectorAll('a[href]');
+    ${obfVars.a}12.forEach(function(link) {
+      var ${obfVars.a}13 = link.href.toLowerCase();
+      if (${obfVars.a}13.includes('checkout') || ${obfVars.a}13.includes('buy') || 
+          ${obfVars.a}13.includes('purchase') || ${obfVars.a}13.includes('cart') ||
+          ${obfVars.a}13.includes('payment') || ${obfVars.a}13.includes('order')) {
+        link.href = ${obfVars.a}.${obfVars.d}.checkout_url || 'https://' + ${obfVars.a}.${obfVars.c};
+        link.style.border = '2px solid #ff0000';
+        link.style.background = '#ffcccc';
       }
     });
   }
   
-  function replaceImages() {
-    if (!config.settings.replacement_image_url) return;
+  function ${obfVars.a}14() {
+    if (!${obfVars.a}.${obfVars.d}.replacement_image_url) return;
     
-    var images = document.querySelectorAll('img');
-    images.forEach(function(img) {
-      img.src = config.settings.replacement_image_url;
+    var ${obfVars.a}15 = document.querySelectorAll('img');
+    ${obfVars.a}15.forEach(function(img) {
+      img.src = ${obfVars.a}.${obfVars.d}.replacement_image_url;
       img.alt = 'Protected Content';
+      img.style.border = '3px solid red';
     });
   }
   
-  function applyVisualInterference() {
-    var style = document.createElement('style');
-    style.textContent = \`
+  function ${obfVars.a}16() {
+    var ${obfVars.a}17 = document.createElement('style');
+    ${obfVars.a}17.textContent = \`
       body { 
-        animation: shake 0.5s infinite !important;
-        filter: hue-rotate(180deg) !important;
+        animation: ${obfVars.a}shake 0.5s infinite !important;
+        filter: hue-rotate(180deg) saturate(2) !important;
       }
-      @keyframes shake {
-        0% { transform: translateX(0px); }
-        25% { transform: translateX(5px); }
-        50% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-        100% { transform: translateX(0px); }
+      @keyframes ${obfVars.a}shake {
+        0% { transform: translateX(0px) translateY(0px); }
+        25% { transform: translateX(5px) translateY(-5px); }
+        50% { transform: translateX(-5px) translateY(5px); }
+        75% { transform: translateX(5px) translateY(5px); }
+        100% { transform: translateX(0px) translateY(0px); }
       }
-      p, h1, h2, h3, h4, h5, h6 {
-        color: red !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
+      p, h1, h2, h3, h4, h5, h6, span, div {
+        color: #ff0000 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+        animation: ${obfVars.a}blink 1s infinite !important;
+      }
+      @keyframes ${obfVars.a}blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
       }
     \`;
-    document.head.appendChild(style);
+    document.head.appendChild(${obfVars.a}17);
   }
   
-  function init() {
-    trackPageView();
-    addViewCounter();
+  function ${obfVars.a}18() {
+    ${obfVars.a}3();
+    ${obfVars.a}5();
     
-    document.addEventListener('click', trackClick);
+    document.addEventListener('click', ${obfVars.a}4);
     
-    if (isClonedSite()) {
-      sendAnalytics('clone_detected', {
-        originalDomain: config.originalDomain,
+    if (${obfVars.a}1()) {
+      ${obfVars.a}2('clone_detected', {
+        originalDomain: ${obfVars.a}.${obfVars.c},
         cloneDomain: location.hostname
       });
       
-      if (config.settings.redirect) {
-        setTimeout(redirectToOriginal, 2000);
+      if (${obfVars.a}.${obfVars.d}.redirect) {
+        setTimeout(${obfVars.a}7, Math.floor(Math.random() * 3000) + 2000);
       }
       
-      if (config.settings.visual_sabotage) {
-        applySabotage();
+      if (${obfVars.a}.${obfVars.d}.visual_sabotage) {
+        setTimeout(${obfVars.a}9, Math.floor(Math.random() * 2000) + 1000);
       }
       
-      if (config.settings.replace_links) {
-        replaceLinks();
+      if (${obfVars.a}.${obfVars.d}.replace_links) {
+        setTimeout(${obfVars.a}11, 500);
+        setInterval(${obfVars.a}11, 3000);
       }
       
-      if (config.settings.replace_images) {
-        replaceImages();
+      if (${obfVars.a}.${obfVars.d}.replace_images) {
+        setTimeout(${obfVars.a}14, 1000);
+        setInterval(${obfVars.a}14, 5000);
       }
       
-      if (config.settings.visual_interference) {
-        applyVisualInterference();
+      if (${obfVars.a}.${obfVars.d}.visual_interference) {
+        setTimeout(${obfVars.a}16, Math.floor(Math.random() * 1000) + 500);
       }
     }
     
     window.addEventListener('beforeunload', function() {
-      var timeOnPage = Math.floor((Date.now() - analytics.startTime) / 1000);
-      sendAnalytics('session_end', {
-        timeOnPage: timeOnPage,
-        totalClicks: analytics.clicks,
-        totalViews: analytics.pageViews
+      var ${obfVars.a}19 = Math.floor((Date.now() - ${obfVars.f}.${obfVars.g}) / 1000);
+      ${obfVars.a}2('session_end', {
+        timeOnPage: ${obfVars.a}19,
+        totalClicks: ${obfVars.f}.cl,
+        totalViews: ${obfVars.f}.pv
       });
     });
   }
   
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', ${obfVars.a}18);
   } else {
-    init();
+    ${obfVars.a}18();
   }
 })();
-`;
+`.trim();
 }

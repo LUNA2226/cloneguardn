@@ -144,19 +144,22 @@ export function Settings() {
     }
   };
 
-  const generateScript = (domain?: ProtectedDomain): string => {
+  // Gera script ofuscado de máximo 5 linhas sem referências
+  const generateObfuscatedScript = (domain?: ProtectedDomain): string => {
     if (domain) {
-      // Script ofuscado para domínios gerados
-      const randomVars = {
+      // Variáveis completamente aleatórias
+      const vars = {
         a: Math.random().toString(36).substring(2, 4),
         b: Math.random().toString(36).substring(2, 4),
-        c: Math.random().toString(36).substring(2, 4)
+        c: Math.random().toString(36).substring(2, 4),
+        d: Math.random().toString(36).substring(2, 4)
       };
 
-      return `(function(){var ${randomVars.a}='${domain.script_id}',${randomVars.b}='${domain.domain}';
-if(location.hostname===${randomVars.b}){var ${randomVars.c}=document.createElement('script');
-${randomVars.c}.src='${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator?scriptId='+${randomVars.a};
-${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
+      // Script ofuscado sem referências ao domínio ou ferramenta
+      return `(function(){var ${vars.a}='${domain.script_id}',${vars.b}='${domain.domain}';
+if(location.hostname===${vars.b}){var ${vars.c}=document.createElement('script');
+${vars.c}.src='${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator?scriptId='+${vars.a};
+${vars.c}.async=true;document.head.appendChild(${vars.c});}})();`;
     } else {
       // Script tradicional para configuração manual
       return `<script src="https://alertaclone.com/script.js"
@@ -169,13 +172,13 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generateScript());
+    navigator.clipboard.writeText(generateObfuscatedScript());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const copyScript = (domain: ProtectedDomain) => {
-    const script = generateScript(domain);
+    const script = generateObfuscatedScript(domain);
     navigator.clipboard.writeText(script);
     setScriptCopied(domain.id);
     setTimeout(() => setScriptCopied(null), 2000);
@@ -351,7 +354,7 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
               </button>
               
               <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8">
-                {generateScript()}
+                {generateObfuscatedScript()}
               </pre>
             </div>
             
@@ -545,7 +548,7 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
                         </button>
                       </div>
                       <pre className="text-gray-300 text-xs overflow-x-auto whitespace-pre-wrap break-all">
-                        {generateScript(domain)}
+                        {generateObfuscatedScript(domain)}
                       </pre>
                     </div>
                   </div>

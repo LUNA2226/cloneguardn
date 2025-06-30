@@ -49,6 +49,7 @@ Deno.serve(async (req: Request) => {
     // Obter IP do visitante
     const visitorIp = req.headers.get('x-forwarded-for') || 
                      req.headers.get('x-real-ip') || 
+                     req.headers.get('cf-connecting-ip') ||
                      'unknown';
 
     const userAgent = req.headers.get('user-agent') || 'unknown';
@@ -76,20 +77,25 @@ Deno.serve(async (req: Request) => {
 
     // Se for fim de sessão, atualizar tempo na página
     if (eventType === 'session_end' && eventData.timeOnPage) {
-      await supabase
+      const { data: existingDetection } = await supabase
         .from('clone_detections')
-        .update({
-          time_on_page: eventData.timeOnPage,
-          actions_taken: supabase.rpc('array_append', {
-            arr: supabase.raw('actions_taken'),
-            elem: 'session_end'
-          })
-        })
+        .select('id')
         .eq('protected_domain_id', protectedDomain.id)
         .eq('clone_domain', domain)
         .eq('visitor_ip', visitorIp)
         .order('detected_at', { ascending: false })
-        .limit(1);
+        .limit(1)
+        .single();
+
+      if (existingDetection) {
+        await supabase
+          .from('clone_detections')
+          .update({
+            time_on_page: eventData.timeOnPage,
+            actions_taken: ['clone_detected', 'session_end']
+          })
+          .eq('id', existingDetection.id);
+      }
     }
 
     return new Response('OK', { status: 200, headers: corsHeaders });
