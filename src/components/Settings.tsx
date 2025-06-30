@@ -271,7 +271,7 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
                     Recomendação:
                   </h3>
                   <p className="text-sm text-gray-400">
-                    Insira este código logo antes da tag </body> ou no <head> do seu HTML.
+                    Insira este código logo antes da tag &lt;/body&gt; ou no &lt;head&gt; do seu HTML.
                   </p>
                 </div>
               </div>
