@@ -25,24 +25,25 @@ export function RegisterPage({
     setError('');
 
     if (!formData.acceptedTerms) {
-      setError('You must accept the terms and privacy policy to continue');
+      setError('Você deve aceitar os termos e política de privacidade para continuar');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('As senhas não coincidem');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError('A senha deve ter pelo menos 6 caracteres');
       return;
     }
 
     setLoading(true);
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // 1. Criar usuário no Supabase Auth
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -56,11 +57,29 @@ export function RegisterPage({
         throw signUpError;
       }
 
-      if (data.user) {
+      if (authData.user) {
+        // 2. Salvar dados personalizados na tabela users
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id, // Usar o mesmo UUID do Supabase Auth
+            email: formData.email,
+            nome: formData.name,
+            dominio: null, // Será preenchido posteriormente
+            plano: 'starter' // Plano padrão
+          });
+
+        if (insertError) {
+          console.error('Erro ao salvar dados do usuário:', insertError);
+          // Não bloquear o login mesmo se houver erro ao salvar dados extras
+        }
+
+        // 3. Fazer login automaticamente
         onLogin();
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during registration');
+      console.error('Erro no cadastro:', err);
+      setError(err.message || 'Ocorreu um erro durante o cadastro');
     } finally {
       setLoading(false);
     }
