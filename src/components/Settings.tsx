@@ -144,10 +144,10 @@ export function Settings() {
     }
   };
 
-  // Gera script ofuscado de máximo 5 linhas sem referências
+  // Gera script ofuscado de máximo 5 linhas SEM TAGS <script>
   const generateObfuscatedScript = (domain?: ProtectedDomain): string => {
     if (domain) {
-      // Variáveis completamente aleatórias
+      // Variáveis completamente aleatórias sem referências
       const vars = {
         a: Math.random().toString(36).substring(2, 4),
         b: Math.random().toString(36).substring(2, 4),
@@ -155,19 +155,18 @@ export function Settings() {
         d: Math.random().toString(36).substring(2, 4)
       };
 
-      // Script ofuscado sem referências ao domínio ou ferramenta
+      // Script ofuscado SEM TAGS, sem referências ao domínio ou ferramenta
       return `(function(){var ${vars.a}='${domain.script_id}',${vars.b}='${domain.domain}';
 if(location.hostname===${vars.b}){var ${vars.c}=document.createElement('script');
 ${vars.c}.src='${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator?scriptId='+${vars.a};
 ${vars.c}.async=true;document.head.appendChild(${vars.c});}})();`;
     } else {
-      // Script tradicional para configuração manual
-      return `<script src="https://alertaclone.com/script.js"
-  data-domain="${selectedDomain}"
-  data-checkout="${checkoutUrl}"
-  data-redirect="${redirectUrl}"
-  data-mode="completo">
-</script>`;
+      // Script tradicional SEM TAGS para configuração manual
+      return `(function(){var a='${selectedDomain}',b='${checkoutUrl}',c='${redirectUrl}';
+var d=document.createElement('script');d.src='https://alertaclone.com/script.js';
+d.setAttribute('data-domain',a);d.setAttribute('data-checkout',b);
+d.setAttribute('data-redirect',c);d.setAttribute('data-mode','completo');
+document.head.appendChild(d);})();`;
     }
   };
 
@@ -353,7 +352,7 @@ ${vars.c}.async=true;document.head.appendChild(${vars.c});}})();`;
                 )}
               </button>
               
-              <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8">
+              <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8 break-all">
                 {generateObfuscatedScript()}
               </pre>
             </div>
@@ -365,10 +364,10 @@ ${vars.c}.async=true;document.head.appendChild(${vars.c});}})();`;
                 </div>
                 <div>
                   <p className="text-sm text-cyan-300 font-medium">
-                    Script configurado para: {selectedDomain}
+                    Script ofuscado configurado para: {selectedDomain}
                   </p>
                   <p className="text-xs text-cyan-400/80 mt-1">
-                    Este script está pronto para ser copiado e colado no seu site. Ele já inclui todas as configurações necessárias para proteção contra clonagem.
+                    Este script está completamente ofuscado, sem referências ao domínio ou ferramenta. Máximo 5 linhas, pronto para ser copiado e colado no seu site.
                   </p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
+import JavaScriptObfuscator from 'npm:javascript-obfuscator@4.0.2';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -46,7 +47,7 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      // Gerar ID único para o script (sem referências ao domínio)
+      // Gerar ID único completamente aleatório (sem referências)
       const scriptId = generateObfuscatedId();
       
       // Salvar domínio protegido
@@ -165,8 +166,8 @@ function generateObfuscatedId(): string {
 }
 
 function generateRandomPath(): string {
-  const paths = ['assets', 'static', 'lib', 'core', 'js', 'cdn'];
-  const files = ['p.js', 'a.js', 'c.js', 'main.js', 'app.js', 'core.js', 'bundle.js'];
+  const paths = ['assets', 'static', 'lib', 'core', 'js', 'cdn', 'dist', 'build'];
+  const files = ['p.js', 'a.js', 'c.js', 'main.js', 'app.js', 'core.js', 'bundle.js', 'index.js'];
   return `/${paths[Math.floor(Math.random() * paths.length)]}/${files[Math.floor(Math.random() * files.length)]}`;
 }
 
@@ -174,7 +175,7 @@ function generateObfuscatedVars(): { [key: string]: string } {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   const vars: { [key: string]: string } = {};
   
-  ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(key => {
+  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].forEach(key => {
     let varName = '';
     for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
       varName += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -188,7 +189,8 @@ function generateObfuscatedVars(): { [key: string]: string } {
 function generateMainScript(scriptId: string, originalDomain: string, settings: any): string {
   const obfVars = generateObfuscatedVars();
   
-  return `
+  // Script principal sem referências ao domínio ou ferramenta
+  const rawScript = `
 (function() {
   'use strict';
   
@@ -391,5 +393,61 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
     ${obfVars.a}18();
   }
 })();
-`.trim();
+`;
+
+  // Aplicar ofuscação avançada com javascript-obfuscator
+  const obfuscatedResult = JavaScriptObfuscator.obfuscate(rawScript, {
+    compact: true,
+    controlFlowFlattening: true,
+    controlFlowFlatteningThreshold: 1,
+    numbersToExpressions: true,
+    simplify: true,
+    stringArrayShuffle: true,
+    splitStrings: true,
+    stringArrayThreshold: 1,
+    transformObjectKeys: true,
+    unicodeEscapeSequence: false,
+    identifierNamesGenerator: 'hexadecimalNumber',
+    renameGlobals: false,
+    selfDefending: true,
+    stringArray: true,
+    rotateStringArray: true,
+    deadCodeInjection: true,
+    deadCodeInjectionThreshold: 0.4,
+    debugProtection: false,
+    debugProtectionInterval: 0,
+    disableConsoleOutput: true,
+    domainLock: [],
+    domainLockRedirectUrl: 'about:blank',
+    forceTransformStrings: [],
+    identifierNamesCache: null,
+    identifiersPrefix: '',
+    ignoreRequireImports: false,
+    inputFileName: '',
+    log: false,
+    renameProperties: false,
+    renamePropertiesMode: 'safe',
+    reservedNames: [],
+    reservedStrings: [],
+    seed: 0,
+    sourceMap: false,
+    sourceMapBaseUrl: '',
+    sourceMapFileName: '',
+    sourceMapMode: 'separate',
+    sourceMapSourcesMode: 'sources-content',
+    splitStringsChunkLength: 5,
+    stringArrayCallsTransform: true,
+    stringArrayCallsTransformThreshold: 0.5,
+    stringArrayEncoding: ['base64'],
+    stringArrayIndexShift: true,
+    stringArrayRotate: true,
+    stringArrayWrappersCount: 1,
+    stringArrayWrappersChainedCalls: true,
+    stringArrayWrappersParametersMaxCount: 2,
+    stringArrayWrappersType: 'variable',
+    target: 'browser',
+    unicodeEscapeSequence: false
+  });
+
+  return obfuscatedResult.getObfuscatedCode();
 }
