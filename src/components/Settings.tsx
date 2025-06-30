@@ -271,7 +271,7 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
                     Recomendação:
                   </h3>
                   <p className="text-sm text-gray-400">
-                    Insira este código logo antes da tag &lt;/body&gt; ou no &lt;head&gt; do seu HTML.
+                    Insira este código logo antes da tag </body> ou no <head> do seu HTML.
                   </p>
                 </div>
               </div>
@@ -304,37 +304,72 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
             </div>
           </section>
 
-          {/* Script Block */}
+          {/* Script Block - AUTOMATICAMENTE GERADO E PRONTO PARA COPIAR */}
           <section className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <h2 className="text-lg font-semibold">Script Gerado</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Script Gerado Automaticamente</h2>
+              <div className="flex items-center space-x-2">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
+                  ✓ Pronto para usar
+                </span>
+                <button 
+                  onClick={handleCopy} 
+                  className="flex items-center px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <CheckIcon size={14} className="mr-1" />
+                      Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardCopyIcon size={14} className="mr-1" />
+                      Copiar Script
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm relative group">
+            
+            <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm relative group border-2 border-cyan-500/30">
+              <div className="absolute top-2 left-2">
+                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-cyan-900/50 text-cyan-300 border border-cyan-500/50">
+                  SCRIPT ATIVO
+                </span>
+              </div>
+              
               <button 
                 onClick={handleCopy} 
-                className="absolute top-3 right-3 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-200 opacity-0 group-hover:opacity-100" 
+                className="absolute top-3 right-3 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-200 opacity-100" 
                 title="Copiar Script"
               >
                 {copied ? (
                   <CheckIcon size={16} className="text-green-400" />
                 ) : (
-                  <ClipboardCopyIcon size={16} className="text-gray-400 hover:text-gray-300" />
+                  <ClipboardCopyIcon size={16} className="text-cyan-400 hover:text-cyan-300" />
                 )}
               </button>
-              <pre className="whitespace-pre-wrap text-gray-300 pr-12">
+              
+              <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8">
                 {generateScript()}
               </pre>
             </div>
-            <p className="mt-2 text-xs text-gray-400">
-              Este script é exclusivo para o domínio selecionado.
-            </p>
-            <button 
-              onClick={handleCopy} 
-              className="mt-4 flex items-center px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 hover:text-white transition-colors"
-            >
-              <ClipboardCopyIcon size={16} className="mr-2" />
-              {copied ? 'Copiado!' : 'Copiar código'}
-            </button>
+            
+            <div className="mt-4 p-3 bg-cyan-900/20 border border-cyan-500/30 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <span className="text-cyan-400">⚡</span>
+                </div>
+                <div>
+                  <p className="text-sm text-cyan-300 font-medium">
+                    Script configurado para: {selectedDomain}
+                  </p>
+                  <p className="text-xs text-cyan-400/80 mt-1">
+                    Este script está pronto para ser copiado e colado no seu site. Ele já inclui todas as configurações necessárias para proteção contra clonagem.
+                  </p>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Configuration Block */}
@@ -483,23 +518,28 @@ ${randomVars.c}.async=true;document.head.appendChild(${randomVars.c});}})();`;
                       </div>
                     </div>
 
-                    {/* Script Ofuscado */}
-                    <div className="bg-gray-900 rounded-lg p-3 font-mono text-sm">
+                    {/* Script Ofuscado - AUTOMATICAMENTE GERADO E PRONTO PARA COPIAR */}
+                    <div className="bg-gray-900 rounded-lg p-3 font-mono text-sm border border-cyan-500/30">
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-gray-400 text-xs">Script Ofuscado (5 linhas):</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-400 text-xs">Script Ofuscado (5 linhas):</span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400">
+                            ✓ Pronto
+                          </span>
+                        </div>
                         <button
                           onClick={() => copyScript(domain)}
-                          className="flex items-center gap-1 px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                          className="flex items-center gap-1 px-2 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-xs transition-colors text-white"
                         >
                           {scriptCopied === domain.id ? (
                             <>
-                              <CheckIcon size={12} className="text-green-400" />
+                              <CheckIcon size={12} className="text-white" />
                               Copiado!
                             </>
                           ) : (
                             <>
                               <CopyIcon size={12} />
-                              Copiar
+                              Copiar Script
                             </>
                           )}
                         </button>
