@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboardIcon, AlertCircleIcon, GlobeIcon, ShieldIcon, SettingsIcon, CreditCardIcon, BellIcon, LogOutIcon, BookOpenIcon, UsersIcon } from 'lucide-react';
+import { LayoutDashboardIcon, AlertCircleIcon, GlobeIcon, ShieldIcon, SettingsIcon, CreditCardIcon, BellIcon, LogOutIcon, BookOpenIcon, UsersIcon, BarChart3Icon } from 'lucide-react';
 import { ProfileModal } from './ProfileModal';
 import { XIcon } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
@@ -41,6 +41,11 @@ export function Sidebar({
       id: 'dashboard',
       label: 'Dashboard',
       icon: <LayoutDashboardIcon size={20} />
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: <BarChart3Icon size={20} />
     },
     {
       id: 'realtime',

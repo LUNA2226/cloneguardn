@@ -19,6 +19,7 @@ import { TermsPage } from './components/pages/TermsPage';
 import { PrivacyPage } from './components/pages/PrivacyPage';
 import { TutorialsPage } from './components/pages/TutorialsPage';
 import { CheckoutSuccessPage } from './components/pages/CheckoutSuccessPage';
+import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { supabase } from './lib/supabase';
 
 export function App() {
@@ -127,6 +128,8 @@ export function App() {
             onAddDomain={() => setActiveScreen('add-domain')}
           />
         );
+      case 'analytics':
+        return <AnalyticsDashboard />;
       case 'clones':
         return <ClonesPage />;
       case 'actions':
