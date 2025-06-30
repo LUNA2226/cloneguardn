@@ -37,7 +37,7 @@ export function LoginPage({
       }
 
       if (data.user) {
-        // Verificar se o usuário existe na tabela users
+        // Check if user exists in users table
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
@@ -45,7 +45,7 @@ export function LoginPage({
           .single();
 
         if (userError && userError.code === 'PGRST116') {
-          // Usuário não existe na tabela users, criar registro
+          // User doesn't exist in users table, create record
           const { error: insertError } = await supabase
             .from('users')
             .insert({
@@ -56,27 +56,27 @@ export function LoginPage({
             });
 
           if (insertError) {
-            console.error('Erro ao criar registro do usuário:', insertError);
-            // Não bloquear o login mesmo se houver erro
+            console.error('Error creating user record:', insertError);
+            // Don't block login even if there's an error
           }
         }
 
         onLogin();
       }
     } catch (err) {
-      console.error('Erro no login:', err);
+      console.error('Login error:', err);
       
-      // Traduzir mensagens de erro comuns
+      // Translate common error messages to English
       let errorMessage = err.message;
       
       if (err.message.includes('Invalid login credentials')) {
-        errorMessage = 'Email ou senha incorretos. Verifique suas credenciais e tente novamente.';
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
       } else if (err.message.includes('Email not confirmed')) {
-        errorMessage = 'Email não confirmado. Verifique sua caixa de entrada e confirme seu email.';
+        errorMessage = 'Email not confirmed. Please check your inbox and confirm your email.';
       } else if (err.message.includes('Too many requests')) {
-        errorMessage = 'Muitas tentativas de login. Aguarde alguns minutos antes de tentar novamente.';
+        errorMessage = 'Too many login attempts. Please wait a few minutes before trying again.';
       } else if (err.message.includes('User not found')) {
-        errorMessage = 'Usuário não encontrado. Verifique o email ou crie uma nova conta.';
+        errorMessage = 'User not found. Please check your email or create a new account.';
       }
       
       setError(errorMessage);
@@ -101,14 +101,14 @@ export function LoginPage({
 
       setResetEmailSent(true);
     } catch (err) {
-      console.error('Erro ao enviar email de recuperação:', err);
+      console.error('Error sending recovery email:', err);
       
       let errorMessage = err.message;
       
       if (err.message.includes('User not found')) {
-        errorMessage = 'Email não encontrado. Verifique o endereço de email ou crie uma nova conta.';
+        errorMessage = 'Email not found. Please check the email address or create a new account.';
       } else if (err.message.includes('Email rate limit exceeded')) {
-        errorMessage = 'Limite de emails excedido. Aguarde alguns minutos antes de tentar novamente.';
+        errorMessage = 'Email rate limit exceeded. Please wait a few minutes before trying again.';
       }
       
       setResetError(errorMessage);
@@ -136,17 +136,17 @@ export function LoginPage({
             <ShieldIcon className="h-8 w-8 text-cyan-400" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-white">
-            {showForgotPassword ? 'Recuperar Senha' : t('auth.login.title')}
+            {showForgotPassword ? 'Reset Password' : 'Welcome back'}
           </h2>
           <p className="mt-2 text-sm text-gray-400">
             {showForgotPassword 
-              ? 'Digite seu email para receber as instruções de recuperação'
-              : t('auth.login.subtitle')
+              ? 'Enter your email to receive password reset instructions'
+              : 'Sign in to your account to continue'
             }
           </p>
         </div>
 
-        {/* Formulário de Recuperação de Senha */}
+        {/* Password Recovery Form */}
         {showForgotPassword && (
           <>
             {resetEmailSent ? (
@@ -156,14 +156,14 @@ export function LoginPage({
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Email Enviado!
+                    Email Sent!
                   </h3>
                   <p className="text-gray-300 text-sm leading-relaxed">
-                    Enviamos as instruções de recuperação de senha para <strong>{resetEmail}</strong>. 
-                    Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
+                    We've sent password reset instructions to <strong>{resetEmail}</strong>. 
+                    Please check your inbox and follow the instructions to reset your password.
                   </p>
                   <p className="text-gray-400 text-xs mt-2">
-                    Não recebeu o email? Verifique sua pasta de spam ou tente novamente em alguns minutos.
+                    Didn't receive the email? Check your spam folder or try again in a few minutes.
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -174,13 +174,13 @@ export function LoginPage({
                     }}
                     className="w-full py-2 px-4 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                   >
-                    Enviar novamente
+                    Send again
                   </button>
                   <button
                     onClick={resetForgotPasswordForm}
                     className="w-full py-2 px-4 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors"
                   >
-                    Voltar ao Login
+                    Back to Login
                   </button>
                 </div>
               </div>
@@ -205,7 +205,7 @@ export function LoginPage({
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.target.value)}
                         className="block w-full px-3 py-2 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                        placeholder="seu@email.com"
+                        placeholder="you@example.com"
                       />
                       <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                     </div>
@@ -217,7 +217,7 @@ export function LoginPage({
                       disabled={resetLoading}
                       className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {resetLoading ? 'Enviando...' : 'Enviar Instruções'}
+                      {resetLoading ? 'Sending...' : 'Send Instructions'}
                     </button>
                     
                     <button
@@ -225,7 +225,7 @@ export function LoginPage({
                       onClick={resetForgotPasswordForm}
                       className="w-full py-2 px-4 text-sm text-gray-300 hover:text-white transition-colors"
                     >
-                      Voltar ao Login
+                      Back to Login
                     </button>
                   </div>
                 </form>
@@ -234,7 +234,7 @@ export function LoginPage({
           </>
         )}
 
-        {/* Formulário de Login */}
+        {/* Login Form */}
         {!showForgotPassword && (
           <>
             {error && (
@@ -247,7 +247,7 @@ export function LoginPage({
               <div className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                    {t('auth.login.email')}
+                    Email
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -265,7 +265,7 @@ export function LoginPage({
                 
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                    {t('auth.login.password')}
+                    Password
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -297,7 +297,7 @@ export function LoginPage({
                     className="h-4 w-4 bg-gray-700 border-gray-600 rounded text-cyan-600 focus:ring-cyan-500"
                   />
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
-                    {t('auth.login.remember')}
+                    Remember me
                   </label>
                 </div>
 
@@ -306,7 +306,7 @@ export function LoginPage({
                   onClick={() => setShowForgotPassword(true)}
                   className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                 >
-                  Esqueceu sua senha?
+                  Forgot your password?
                 </button>
               </div>
 
@@ -319,10 +319,10 @@ export function LoginPage({
                   {loading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Entrando...
+                      Signing in...
                     </div>
                   ) : (
-                    t('auth.login.submit')
+                    'Sign in'
                   )}
                 </button>
               </div>
@@ -330,12 +330,12 @@ export function LoginPage({
 
             <div className="text-center">
               <p className="text-sm text-gray-400">
-                {t('auth.login.noAccount')}{' '}
+                Don't have an account?{' '}
                 <button
                   onClick={onRegister}
                   className="font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
                 >
-                  {t('auth.login.register')}
+                  Sign up
                 </button>
               </p>
             </div>

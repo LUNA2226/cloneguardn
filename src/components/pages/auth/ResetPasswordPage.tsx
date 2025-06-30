@@ -17,13 +17,13 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
   const [validSession, setValidSession] = useState(false);
 
   useEffect(() => {
-    // Verificar se há uma sessão de recuperação válida
+    // Check if there's a valid recovery session
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setValidSession(true);
       } else {
-        setError('Link de recuperação inválido ou expirado. Solicite um novo link de recuperação.');
+        setError('Invalid or expired recovery link. Please request a new password reset link.');
       }
     };
 
@@ -35,12 +35,12 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
+      setError('Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError('Password must be at least 6 characters long');
       return;
     }
 
@@ -57,20 +57,20 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
 
       setSuccess(true);
       
-      // Redirecionar após 3 segundos
+      // Redirect after 3 seconds
       setTimeout(() => {
         onSuccess();
       }, 3000);
 
     } catch (err: any) {
-      console.error('Erro ao redefinir senha:', err);
+      console.error('Error resetting password:', err);
       
       let errorMessage = err.message;
       
       if (err.message.includes('New password should be different')) {
-        errorMessage = 'A nova senha deve ser diferente da senha atual';
+        errorMessage = 'New password must be different from the current password';
       } else if (err.message.includes('Password should be at least')) {
-        errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+        errorMessage = 'Password must be at least 6 characters long';
       }
       
       setError(errorMessage);
@@ -82,7 +82,7 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
   if (!validSession && !error) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-        <div className="text-white">Verificando link de recuperação...</div>
+        <div className="text-white">Verifying recovery link...</div>
       </div>
     );
   }
@@ -96,17 +96,17 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white mb-2">
-              Senha Redefinida!
+              Password Reset!
             </h2>
             <p className="text-gray-300">
-              Sua senha foi redefinida com sucesso. Você será redirecionado para a página de login em alguns segundos.
+              Your password has been successfully reset. You will be redirected to the login page in a few seconds.
             </p>
           </div>
           <button
             onClick={onSuccess}
             className="w-full py-2 px-4 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors"
           >
-            Ir para Login
+            Go to Login
           </button>
         </div>
       </div>
@@ -121,10 +121,10 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
             <ShieldIcon className="h-8 w-8 text-cyan-400" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-white">
-            Redefinir Senha
+            Reset Password
           </h2>
           <p className="mt-2 text-sm text-gray-400 text-center">
-            Digite sua nova senha abaixo
+            Enter your new password below
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                Nova Senha
+                New Password
               </label>
               <div className="mt-1 relative">
                 <input
@@ -161,13 +161,13 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-400">
-                A senha deve ter pelo menos 6 caracteres
+                Password must be at least 6 characters long
               </p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300">
-                Confirmar Nova Senha
+                Confirm New Password
               </label>
               <div className="mt-1 relative">
                 <input
@@ -199,10 +199,10 @@ export function ResetPasswordPage({ onSuccess }: ResetPasswordPageProps) {
                 {loading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Redefinindo...
+                    Resetting...
                   </div>
                 ) : (
-                  'Redefinir Senha'
+                  'Reset Password'
                 )}
               </button>
             </div>

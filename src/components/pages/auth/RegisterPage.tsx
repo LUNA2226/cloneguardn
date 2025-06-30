@@ -25,24 +25,24 @@ export function RegisterPage({
     setError('');
 
     if (!formData.acceptedTerms) {
-      setError('Você deve aceitar os termos e política de privacidade para continuar');
+      setError('You must accept the terms and privacy policy to continue');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem');
+      setError('Passwords do not match');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError('Password must be at least 6 characters long');
       return;
     }
 
     setLoading(true);
 
     try {
-      // 1. Criar usuário no Supabase Auth
+      // 1. Create user in Supabase Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -58,28 +58,28 @@ export function RegisterPage({
       }
 
       if (authData.user) {
-        // 2. Salvar dados personalizados na tabela users
+        // 2. Save custom data in users table
         const { error: insertError } = await supabase
           .from('users')
           .insert({
-            id: authData.user.id, // Usar o mesmo UUID do Supabase Auth
+            id: authData.user.id, // Use the same UUID from Supabase Auth
             email: formData.email,
             nome: formData.name,
-            dominio: null, // Será preenchido posteriormente
-            plano: 'starter' // Plano padrão
+            dominio: null, // Will be filled later
+            plano: 'starter' // Default plan
           });
 
         if (insertError) {
-          console.error('Erro ao salvar dados do usuário:', insertError);
-          // Não bloquear o login mesmo se houver erro ao salvar dados extras
+          console.error('Error saving user data:', insertError);
+          // Don't block login even if there's an error saving extra data
         }
 
-        // 3. Fazer login automaticamente
+        // 3. Auto login
         onLogin();
       }
     } catch (err) {
-      console.error('Erro no cadastro:', err);
-      setError(err.message || 'Ocorreu um erro durante o cadastro');
+      console.error('Registration error:', err);
+      setError(err.message || 'An error occurred during registration');
     } finally {
       setLoading(false);
     }
@@ -105,10 +105,10 @@ export function RegisterPage({
             <ShieldIcon className="h-8 w-8 text-cyan-400" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-white">
-            {t('auth.register.title')}
+            Create new account
           </h2>
           <p className="mt-2 text-sm text-gray-400">
-            {t('auth.register.subtitle')}
+            Fill in your information to get started
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export function RegisterPage({
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-300">
-                {t('auth.register.fullName')}
+                Full name
               </label>
               <input
                 id="name"
@@ -132,13 +132,13 @@ export function RegisterPage({
                 value={formData.name}
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                placeholder={t('auth.register.fullName')}
+                placeholder="Full name"
               />
             </div>
             
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                {t('auth.register.email')}
+                Email
               </label>
               <input
                 id="email"
@@ -154,7 +154,7 @@ export function RegisterPage({
             
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                {t('auth.register.password')}
+                Password
               </label>
               <div className="mt-1 relative">
                 <input
@@ -179,7 +179,7 @@ export function RegisterPage({
             
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300">
-                {t('auth.register.confirmPassword')}
+                Confirm password
               </label>
               <div className="mt-1">
                 <input
@@ -208,21 +208,21 @@ export function RegisterPage({
               </div>
               <div className="ml-3">
                 <label htmlFor="acceptedTerms" className="text-sm text-gray-300">
-                  Li e aceito os{' '}
+                  I agree to the{' '}
                   <button
                     type="button"
                     onClick={() => setActiveScreen('terms')}
                     className="text-cyan-400 hover:text-cyan-300"
                   >
-                    termos de uso
+                    terms of service
                   </button>
-                  {' '}e{' '}
+                  {' '}and{' '}
                   <button
                     type="button"
                     onClick={() => setActiveScreen('privacy')}
                     className="text-cyan-400 hover:text-cyan-300"
                   >
-                    política de privacidade
+                    privacy policy
                   </button>
                 </label>
               </div>
@@ -235,19 +235,19 @@ export function RegisterPage({
               disabled={loading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t('common.loading') : t('auth.register.submit')}
+              {loading ? 'Creating account...' : 'Create account'}
             </button>
           </div>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-400">
-            {t('auth.register.hasAccount')}{' '}
+            Already have an account?{' '}
             <button
               onClick={onLogin}
               className="font-medium text-cyan-400 hover:text-cyan-300"
             >
-              {t('auth.register.login')}
+              Sign in
             </button>
           </p>
         </div>
