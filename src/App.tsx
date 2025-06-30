@@ -10,6 +10,7 @@ import { AddDomainPage } from './components/pages/AddDomainPage';
 import { LoginPage } from './components/pages/auth/LoginPage';
 import { RegisterPage } from './components/pages/auth/RegisterPage';
 import { ForgotPasswordPage } from './components/pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './components/pages/auth/ResetPasswordPage';
 import { SubscriptionPage } from './components/pages/SubscriptionPage';
 import { PricingPage } from './components/pages/PricingPage';
 import { CancelSubscriptionPage } from './components/pages/CancelSubscriptionPage';
@@ -28,8 +29,29 @@ export function App() {
   const [activeScreen, setActiveScreen] = useState('dashboard');
   const [selectedDomain, setSelectedDomain] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isResetPassword, setIsResetPassword] = useState(false);
 
   useEffect(() => {
+    // Verificar se é uma página de reset de senha
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
+    const type = urlParams.get('type');
+
+    if (type === 'recovery' && accessToken && refreshToken) {
+      // Configurar sessão para reset de senha
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      }).then(() => {
+        setIsResetPassword(true);
+        setLoading(false);
+        // Limpar URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
+      return;
+    }
+
     // Check initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
@@ -41,6 +63,7 @@ export function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
+      setIsResetPassword(false);
       setLoading(false);
     });
 
@@ -63,6 +86,7 @@ export function App() {
 
   const handleLogin = () => {
     setIsAuthenticated(true);
+    setIsResetPassword(false);
   };
 
   const handleLogout = async () => {
@@ -76,12 +100,22 @@ export function App() {
     setActiveScreen('actions');
   };
 
+  const handleResetPasswordSuccess = () => {
+    setIsResetPassword(false);
+    setAuthScreen('login');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     );
+  }
+
+  // Se é página de reset de senha
+  if (isResetPassword) {
+    return <ResetPasswordPage onSuccess={handleResetPasswordSuccess} />;
   }
 
   // If not authenticated, show auth screens
