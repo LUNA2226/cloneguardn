@@ -3,7 +3,6 @@ import { MetricCard } from './MetricCard';
 import { CloneTable } from './CloneTable';
 import { GlobeIcon, DollarSignIcon, ExternalLinkIcon, AlertTriangleIcon } from 'lucide-react';
 import { DashboardCharts } from './DashboardCharts';
-import { AnalyticsDashboard } from './AnalyticsDashboard';
 
 export function Dashboard({
   onViewActions,
@@ -52,9 +51,6 @@ export function Dashboard({
           isActive={true} 
         />
       </div>
-
-      {/* Analytics Completo Integrado */}
-      <AnalyticsDashboard />
 
       <DashboardCharts />
 
