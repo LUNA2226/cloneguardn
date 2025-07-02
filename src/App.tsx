@@ -32,21 +32,32 @@ export function App() {
   const [isResetPassword, setIsResetPassword] = useState(false);
 
   useEffect(() => {
-    // Verificar se é uma página de reset de senha
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const refreshToken = urlParams.get('refresh_token');
-    const type = urlParams.get('type');
+    // Check for password reset parameters in URL hash (Supabase sends tokens in hash)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
 
-    if (type === 'recovery' && accessToken && refreshToken) {
-      // Configurar sessão para reset de senha
+    // Also check query string as fallback
+    const queryParams = new URLSearchParams(window.location.search);
+    const queryAccessToken = queryParams.get('access_token');
+    const queryRefreshToken = queryParams.get('refresh_token');
+    const queryType = queryParams.get('type');
+
+    // Use hash params first, then fallback to query params
+    const finalAccessToken = accessToken || queryAccessToken;
+    const finalRefreshToken = refreshToken || queryRefreshToken;
+    const finalType = type || queryType;
+
+    if (finalType === 'recovery' && finalAccessToken && finalRefreshToken) {
+      // Set session for password reset
       supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
+        access_token: finalAccessToken,
+        refresh_token: finalRefreshToken
       }).then(() => {
         setIsResetPassword(true);
         setLoading(false);
-        // Limpar URL
+        // Clear URL hash and query params
         window.history.replaceState({}, document.title, window.location.pathname);
       });
       return;
