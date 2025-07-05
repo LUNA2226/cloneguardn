@@ -45,7 +45,8 @@ export function ProtectedDomains() {
     loadDomains();
   };
 
-  return <div className="p-6">
+  return (
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Protected Domains</h1>
         <button onClick={() => setIsAddModalOpen(true)} className="px-4 py-2 bg-cyan-600 rounded-lg hover:bg-cyan-500 flex items-center">
@@ -65,7 +66,6 @@ export function ProtectedDomains() {
             <span className="text-xs text-gray-500">Premium Plan</span>
           </div>
         </div>
-        <table className="w-full">
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto mb-4"></div>
@@ -84,55 +84,60 @@ export function ProtectedDomains() {
             </button>
           </div>
         ) : (
-          <thead>
-            <tr className="bg-gray-700">
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Domain
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Status
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Created
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Active
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {domains.map(domain => <tr key={domain.id} className="hover:bg-gray-750">
-                <td className="px-4 py-3">
-                  <div className="flex items-center">
-                    <span className="font-medium">{domain.domain}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${domain.status === 'protected' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
-                    {domain.is_active ? 'Protected' : 'Inactive'}
-                    domain.is_active 
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-300">
-                  {new Date(domain.created_at).toLocaleDateString()}
-                </td>
-                  <span className={domain.is_active ? 'text-green-400' : 'text-gray-400'}>
-                    {domain.is_active ? 'Yes' : 'No'}
-                  </span>
-                    Protection
-                  </button>
-                </td>
-              </tr>)}
-          </tbody>
-        </table>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-700">
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
+                  Domain
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
+                  Created
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
+                  Active
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-700">
+              {domains.map(domain => (
+                <tr key={domain.id} className="hover:bg-gray-750">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center">
+                      <span className="font-medium">{domain.domain}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${domain.status === 'protected' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
+                      {domain.is_active ? 'Protected' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-300">
+                    {new Date(domain.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={domain.is_active ? 'text-green-400' : 'text-gray-400'}>
+                      {domain.is_active ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button onClick={() => handleProtectionClick(domain)} className="text-cyan-400 hover:text-cyan-300">
+                      Protection
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
-      {isAddModalOpen && <AddDomainModal onClose={() => setIsAddModalOpen(false)} />}
+      {isAddModalOpen && <AddDomainModal onClose={() => setIsAddModalOpen(false)} onDomainAdded={handleDomainAdded} />}
       {isProtectionModalOpen && <ProtectionModal domain={selectedDomain} onClose={() => setIsProtectionModalOpen(false)} />}
-        <AddDomainModal 
-          onClose={() => setIsAddModalOpen(false)} 
-          onDomainAdded={handleDomainAdded}
-        />
+    </div>
+  );
 }
