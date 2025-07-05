@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
       const scriptId = url.searchParams.get('scriptId');
 
       if (scriptId) {
-        // Retornar script principal ofuscado
+        // Retornar script principal completamente ofuscado
         const { data: domain } = await supabase
           .from('protected_domains')
           .select('domain, settings')
@@ -165,19 +165,14 @@ function generateObfuscatedId(): string {
   return result;
 }
 
-function generateRandomPath(): string {
-  const paths = ['assets', 'static', 'lib', 'core', 'js', 'cdn', 'dist', 'build'];
-  const files = ['p.js', 'a.js', 'c.js', 'main.js', 'app.js', 'core.js', 'bundle.js', 'index.js'];
-  return `/${paths[Math.floor(Math.random() * paths.length)]}/${files[Math.floor(Math.random() * files.length)]}`;
-}
-
 function generateObfuscatedVars(): { [key: string]: string } {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   const vars: { [key: string]: string } = {};
   
-  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].forEach(key => {
+  // Gerar nomes de variáveis completamente aleatórios
+  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p'].forEach(key => {
     let varName = '';
-    for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
       varName += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     vars[key] = varName;
@@ -186,35 +181,99 @@ function generateObfuscatedVars(): { [key: string]: string } {
   return vars;
 }
 
+function generateRandomStrings(): { [key: string]: string } {
+  // Gerar strings aleatórias para mascarar as reais
+  const randomStrings = {
+    domain1: generateRandomDomain(),
+    domain2: generateRandomDomain(),
+    url1: generateRandomUrl(),
+    url2: generateRandomUrl(),
+    url3: generateRandomUrl(),
+    endpoint1: generateRandomEndpoint(),
+    endpoint2: generateRandomEndpoint(),
+  };
+  
+  return randomStrings;
+}
+
+function generateRandomDomain(): string {
+  const prefixes = ['api', 'cdn', 'static', 'assets', 'core', 'lib', 'app'];
+  const suffixes = ['tech', 'cloud', 'net', 'io', 'dev', 'app', 'web'];
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+  const random = Math.random().toString(36).substring(2, 6);
+  return `${prefix}${random}.${suffix}`;
+}
+
+function generateRandomUrl(): string {
+  return `https://${generateRandomDomain()}/${Math.random().toString(36).substring(2, 8)}`;
+}
+
+function generateRandomEndpoint(): string {
+  const endpoints = ['api/v1/data', 'core/analytics', 'lib/tracker', 'cdn/assets', 'app/metrics'];
+  return endpoints[Math.floor(Math.random() * endpoints.length)];
+}
+
 function generateMainScript(scriptId: string, originalDomain: string, settings: any): string {
   const obfVars = generateObfuscatedVars();
+  const randomStrs = generateRandomStrings();
   
-  // Script principal sem referências ao domínio ou ferramenta
+  // Script principal com máxima ofuscação - TODAS as informações sensíveis são mascaradas
   const rawScript = `
 (function() {
   'use strict';
   
+  // Configuração ofuscada - valores reais misturados com falsos
   var ${obfVars.a} = {
     ${obfVars.b}: '${scriptId}',
     ${obfVars.c}: '${originalDomain}',
     ${obfVars.d}: ${JSON.stringify(settings)},
-    ${obfVars.e}: '${Deno.env.get('SUPABASE_URL')}/functions/v1/script-tracker'
+    ${obfVars.e}: '${Deno.env.get('SUPABASE_URL')}/functions/v1/script-tracker',
+    ${obfVars.f}: '${randomStrs.domain1}',
+    ${obfVars.g}: '${randomStrs.domain2}',
+    ${obfVars.h}: '${randomStrs.url1}',
+    ${obfVars.i}: '${randomStrs.url2}',
+    ${obfVars.j}: '${randomStrs.url3}',
+    ${obfVars.k}: '${randomStrs.endpoint1}',
+    ${obfVars.l}: '${randomStrs.endpoint2}'
   };
   
-  var ${obfVars.f} = {
-    ${obfVars.g}: Date.now(),
-    pv: 0,
-    cl: 0,
-    ac: []
+  // Dados de sessão ofuscados
+  var ${obfVars.m} = {
+    ${obfVars.n}: Date.now(),
+    ${obfVars.o}: 0,
+    ${obfVars.p}: 0,
+    ac: [],
+    ${obfVars.f}: false,
+    ${obfVars.g}: null,
+    ${obfVars.h}: []
   };
   
+  // Função de verificação de domínio ofuscada
   function ${obfVars.a}1() {
-    return location.hostname !== ${obfVars.a}.${obfVars.c};
+    var ${obfVars.a}2 = location.hostname;
+    var ${obfVars.a}3 = ${obfVars.a}.${obfVars.c};
+    
+    // Adicionar verificações falsas para confundir
+    if (${obfVars.a}2 === ${obfVars.a}.${obfVars.f}) return false;
+    if (${obfVars.a}2 === ${obfVars.a}.${obfVars.g}) return false;
+    
+    return ${obfVars.a}2 !== ${obfVars.a}3;
   }
   
-  function ${obfVars.a}2(t, d) {
+  // Função de comunicação ofuscada
+  function ${obfVars.a}4(t, d) {
     try {
-      fetch(${obfVars.a}.${obfVars.e}, {
+      var ${obfVars.a}5 = ${obfVars.a}.${obfVars.e};
+      
+      // Adicionar endpoints falsos para confundir
+      if (Math.random() > 0.5) {
+        var ${obfVars.a}6 = 'https://' + ${obfVars.a}.${obfVars.f} + '/' + ${obfVars.a}.${obfVars.k};
+      } else {
+        var ${obfVars.a}6 = 'https://' + ${obfVars.a}.${obfVars.g} + '/' + ${obfVars.a}.${obfVars.l};
+      }
+      
+      fetch(${obfVars.a}5, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -229,9 +288,10 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
     } catch(e) {}
   }
   
-  function ${obfVars.a}3() {
-    ${obfVars.f}.pv++;
-    ${obfVars.a}2('page_view', {
+  // Função de rastreamento de visualizações ofuscada
+  function ${obfVars.a}7() {
+    ${obfVars.m}.${obfVars.o}++;
+    ${obfVars.a}4('page_view', {
       domain: location.hostname,
       url: location.href,
       referrer: document.referrer,
@@ -239,39 +299,44 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
     });
   }
   
-  function ${obfVars.a}4(e) {
-    ${obfVars.f}.cl++;
-    ${obfVars.a}2('click', {
+  // Função de rastreamento de cliques ofuscada
+  function ${obfVars.a}8(e) {
+    ${obfVars.m}.${obfVars.p}++;
+    ${obfVars.a}4('click', {
       element: e.target.tagName,
       text: e.target.textContent ? e.target.textContent.substring(0, 100) : '',
       href: e.target.href || null
     });
   }
   
-  function ${obfVars.a}5() {
-    var ${obfVars.a}6 = document.createElement('div');
-    ${obfVars.a}6.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;z-index:999999;font-family:monospace;';
-    ${obfVars.a}6.textContent = 'Views: ' + ${obfVars.f}.pv;
-    document.body.appendChild(${obfVars.a}6);
+  // Função de redirecionamento ofuscada
+  function ${obfVars.a}9() {
+    var ${obfVars.a}10 = ${obfVars.a}.${obfVars.d}.redirect_url || 'https://' + ${obfVars.a}.${obfVars.c};
     
-    setInterval(function() {
-      ${obfVars.a}6.textContent = 'Views: ' + ${obfVars.f}.pv;
-    }, 1000);
-  }
-  
-  function ${obfVars.a}7() {
-    var ${obfVars.a}8 = ${obfVars.a}.${obfVars.d}.redirect_url || 'https://' + ${obfVars.a}.${obfVars.c};
-    ${obfVars.a}2('redirect', { from: location.href, to: ${obfVars.a}8 });
+    // Adicionar URLs falsas para confundir
+    var ${obfVars.a}11 = [
+      ${obfVars.a}.${obfVars.h},
+      ${obfVars.a}.${obfVars.i},
+      ${obfVars.a}.${obfVars.j},
+      ${obfVars.a}10
+    ];
+    
+    var ${obfVars.a}12 = ${obfVars.a}11[${obfVars.a}11.length - 1];
+    
+    ${obfVars.a}4('redirect', { from: location.href, to: ${obfVars.a}12 });
     setTimeout(function() {
-      location.href = ${obfVars.a}8;
+      location.href = ${obfVars.a}12;
     }, Math.floor(Math.random() * 2000) + 1000);
   }
   
-  function ${obfVars.a}9() {
-    var ${obfVars.a}10 = document.createElement('style');
-    ${obfVars.a}10.textContent = \`
+  // Função de sabotagem visual ofuscada
+  function ${obfVars.a}13() {
+    var ${obfVars.a}14 = document.createElement('style');
+    var ${obfVars.a}15 = Math.random().toString(36).substring(2, 8);
+    
+    ${obfVars.a}14.textContent = \`
       * { 
-        filter: blur(3px) contrast(0.5) !important; 
+        filter: blur(\${Math.floor(Math.random() * 5) + 2}px) contrast(0.5) !important; 
         transition: all 0.3s ease !important;
       }
       a, button, input, select, textarea { 
@@ -279,123 +344,194 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
         cursor: not-allowed !important;
       }
       img { 
-        filter: grayscale(100%) blur(5px) !important; 
+        filter: grayscale(100%) blur(\${Math.floor(Math.random() * 8) + 3}px) !important; 
       }
-    \`;
-    document.head.appendChild(${obfVars.a}10);
-    
-    setTimeout(function() {
-      document.body.style.transform = 'rotate(180deg)';
-      document.body.style.transition = 'transform 2s ease';
-    }, 3000);
-  }
-  
-  function ${obfVars.a}11() {
-    var ${obfVars.a}12 = document.querySelectorAll('a[href]');
-    ${obfVars.a}12.forEach(function(link) {
-      var ${obfVars.a}13 = link.href.toLowerCase();
-      if (${obfVars.a}13.includes('checkout') || ${obfVars.a}13.includes('buy') || 
-          ${obfVars.a}13.includes('purchase') || ${obfVars.a}13.includes('cart') ||
-          ${obfVars.a}13.includes('payment') || ${obfVars.a}13.includes('order')) {
-        link.href = ${obfVars.a}.${obfVars.d}.checkout_url || 'https://' + ${obfVars.a}.${obfVars.c};
-        link.style.border = '2px solid #ff0000';
-        link.style.background = '#ffcccc';
+      .\${${obfVars.a}15} {
+        animation: \${${obfVars.a}15}shake 0.5s infinite !important;
       }
-    });
-  }
-  
-  function ${obfVars.a}14() {
-    if (!${obfVars.a}.${obfVars.d}.replacement_image_url) return;
-    
-    var ${obfVars.a}15 = document.querySelectorAll('img');
-    ${obfVars.a}15.forEach(function(img) {
-      img.src = ${obfVars.a}.${obfVars.d}.replacement_image_url;
-      img.alt = 'Protected Content';
-      img.style.border = '3px solid red';
-    });
-  }
-  
-  function ${obfVars.a}16() {
-    var ${obfVars.a}17 = document.createElement('style');
-    ${obfVars.a}17.textContent = \`
-      body { 
-        animation: ${obfVars.a}shake 0.5s infinite !important;
-        filter: hue-rotate(180deg) saturate(2) !important;
-      }
-      @keyframes ${obfVars.a}shake {
+      @keyframes \${${obfVars.a}15}shake {
         0% { transform: translateX(0px) translateY(0px); }
-        25% { transform: translateX(5px) translateY(-5px); }
-        50% { transform: translateX(-5px) translateY(5px); }
-        75% { transform: translateX(5px) translateY(5px); }
+        25% { transform: translateX(\${Math.floor(Math.random() * 10) + 2}px) translateY(-\${Math.floor(Math.random() * 10) + 2}px); }
+        50% { transform: translateX(-\${Math.floor(Math.random() * 10) + 2}px) translateY(\${Math.floor(Math.random() * 10) + 2}px); }
+        75% { transform: translateX(\${Math.floor(Math.random() * 10) + 2}px) translateY(\${Math.floor(Math.random() * 10) + 2}px); }
         100% { transform: translateX(0px) translateY(0px); }
       }
-      p, h1, h2, h3, h4, h5, h6, span, div {
-        color: #ff0000 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
-        animation: ${obfVars.a}blink 1s infinite !important;
-      }
-      @keyframes ${obfVars.a}blink {
-        0%, 50% { opacity: 1; }
-        51%, 100% { opacity: 0.3; }
-      }
     \`;
-    document.head.appendChild(${obfVars.a}17);
+    document.head.appendChild(${obfVars.a}14);
+    
+    setTimeout(function() {
+      document.body.style.transform = 'rotate(' + (Math.floor(Math.random() * 360)) + 'deg)';
+      document.body.style.transition = 'transform 2s ease';
+      document.body.className += ' ' + ${obfVars.a}15;
+    }, Math.floor(Math.random() * 3000) + 1000);
   }
   
-  function ${obfVars.a}18() {
-    ${obfVars.a}3();
-    ${obfVars.a}5();
+  // Função de substituição de links ofuscada
+  function ${obfVars.a}16() {
+    var ${obfVars.a}17 = document.querySelectorAll('a[href]');
+    var ${obfVars.a}18 = ${obfVars.a}.${obfVars.d}.checkout_url || 'https://' + ${obfVars.a}.${obfVars.c};
     
-    document.addEventListener('click', ${obfVars.a}4);
+    // Adicionar URLs falsas para confundir
+    var ${obfVars.a}19 = [
+      ${obfVars.a}.${obfVars.h} + '/checkout',
+      ${obfVars.a}.${obfVars.i} + '/buy',
+      ${obfVars.a}.${obfVars.j} + '/purchase',
+      ${obfVars.a}18
+    ];
     
-    if (${obfVars.a}1()) {
-      ${obfVars.a}2('clone_detected', {
-        originalDomain: ${obfVars.a}.${obfVars.c},
-        cloneDomain: location.hostname
+    var ${obfVars.a}20 = ${obfVars.a}19[${obfVars.a}19.length - 1];
+    
+    ${obfVars.a}17.forEach(function(link) {
+      var ${obfVars.a}21 = link.href.toLowerCase();
+      var ${obfVars.a}22 = [
+        'checkout', 'buy', 'purchase', 'cart', 'payment', 'order', 
+        'comprar', 'finalizar', 'pagamento', 'carrinho'
+      ];
+      
+      var ${obfVars.a}23 = ${obfVars.a}22.some(function(keyword) {
+        return ${obfVars.a}21.includes(keyword);
       });
       
+      if (${obfVars.a}23) {
+        link.href = ${obfVars.a}20;
+        link.style.border = '2px solid #' + Math.floor(Math.random()*16777215).toString(16);
+        link.style.background = '#' + Math.floor(Math.random()*16777215).toString(16);
+      }
+    });
+  }
+  
+  // Função de substituição de imagens ofuscada
+  function ${obfVars.a}24() {
+    if (!${obfVars.a}.${obfVars.d}.replacement_image_url) return;
+    
+    var ${obfVars.a}25 = document.querySelectorAll('img');
+    var ${obfVars.a}26 = ${obfVars.a}.${obfVars.d}.replacement_image_url;
+    
+    // Adicionar URLs de imagens falsas para confundir
+    var ${obfVars.a}27 = [
+      ${obfVars.a}.${obfVars.h} + '/image.jpg',
+      ${obfVars.a}.${obfVars.i} + '/photo.png',
+      ${obfVars.a}.${obfVars.j} + '/pic.gif',
+      ${obfVars.a}26
+    ];
+    
+    var ${obfVars.a}28 = ${obfVars.a}27[${obfVars.a}27.length - 1];
+    
+    ${obfVars.a}25.forEach(function(img) {
+      img.src = ${obfVars.a}28;
+      img.alt = 'Protected Content - ' + Math.random().toString(36).substring(2, 8);
+      img.style.border = '3px solid #' + Math.floor(Math.random()*16777215).toString(16);
+    });
+  }
+  
+  // Função de interferência visual ofuscada
+  function ${obfVars.a}29() {
+    var ${obfVars.a}30 = document.createElement('style');
+    var ${obfVars.a}31 = Math.random().toString(36).substring(2, 8);
+    var ${obfVars.a}32 = Math.random().toString(36).substring(2, 8);
+    
+    ${obfVars.a}30.textContent = \`
+      body { 
+        animation: \${${obfVars.a}31} 0.5s infinite !important;
+        filter: hue-rotate(\${Math.floor(Math.random() * 360)}deg) saturate(\${Math.floor(Math.random() * 3) + 1}) !important;
+      }
+      @keyframes \${${obfVars.a}31} {
+        0% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+        25% { transform: translateX(\${Math.floor(Math.random() * 10) + 2}px) translateY(-\${Math.floor(Math.random() * 10) + 2}px) rotate(\${Math.floor(Math.random() * 10)}deg); }
+        50% { transform: translateX(-\${Math.floor(Math.random() * 10) + 2}px) translateY(\${Math.floor(Math.random() * 10) + 2}px) rotate(-\${Math.floor(Math.random() * 10)}deg); }
+        75% { transform: translateX(\${Math.floor(Math.random() * 10) + 2}px) translateY(\${Math.floor(Math.random() * 10) + 2}px) rotate(\${Math.floor(Math.random() * 10)}deg); }
+        100% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+      }
+      p, h1, h2, h3, h4, h5, h6, span, div {
+        color: #\${Math.floor(Math.random()*16777215).toString(16)} !important;
+        text-shadow: \${Math.floor(Math.random() * 5) + 1}px \${Math.floor(Math.random() * 5) + 1}px \${Math.floor(Math.random() * 8) + 2}px rgba(0,0,0,0.8) !important;
+        animation: \${${obfVars.a}32} 1s infinite !important;
+      }
+      @keyframes \${${obfVars.a}32} {
+        0%, 50% { opacity: 1; transform: scale(1); }
+        51%, 100% { opacity: \${Math.random() * 0.5 + 0.3}; transform: scale(\${Math.random() * 0.3 + 0.9}); }
+      }
+    \`;
+    document.head.appendChild(${obfVars.a}30);
+  }
+  
+  // Função principal de inicialização ofuscada
+  function ${obfVars.a}33() {
+    ${obfVars.a}7();
+    
+    document.addEventListener('click', ${obfVars.a}8);
+    
+    // Verificar se é um clone
+    if (${obfVars.a}1()) {
+      ${obfVars.a}4('clone_detected', {
+        originalDomain: ${obfVars.a}.${obfVars.c},
+        cloneDomain: location.hostname,
+        timestamp: Date.now(),
+        userAgent: navigator.userAgent
+      });
+      
+      // Aplicar ações baseadas nas configurações
+      var ${obfVars.a}34 = Math.floor(Math.random() * 5000) + 2000;
+      var ${obfVars.a}35 = Math.floor(Math.random() * 3000) + 1000;
+      var ${obfVars.a}36 = Math.floor(Math.random() * 2000) + 500;
+      
       if (${obfVars.a}.${obfVars.d}.redirect) {
-        setTimeout(${obfVars.a}7, Math.floor(Math.random() * 3000) + 2000);
+        setTimeout(${obfVars.a}9, ${obfVars.a}34);
       }
       
       if (${obfVars.a}.${obfVars.d}.visual_sabotage) {
-        setTimeout(${obfVars.a}9, Math.floor(Math.random() * 2000) + 1000);
+        setTimeout(${obfVars.a}13, ${obfVars.a}35);
       }
       
       if (${obfVars.a}.${obfVars.d}.replace_links) {
-        setTimeout(${obfVars.a}11, 500);
-        setInterval(${obfVars.a}11, 3000);
+        setTimeout(${obfVars.a}16, 500);
+        setInterval(${obfVars.a}16, 3000);
       }
       
       if (${obfVars.a}.${obfVars.d}.replace_images) {
-        setTimeout(${obfVars.a}14, 1000);
-        setInterval(${obfVars.a}14, 5000);
+        setTimeout(${obfVars.a}24, 1000);
+        setInterval(${obfVars.a}24, 5000);
       }
       
       if (${obfVars.a}.${obfVars.d}.visual_interference) {
-        setTimeout(${obfVars.a}16, Math.floor(Math.random() * 1000) + 500);
+        setTimeout(${obfVars.a}29, ${obfVars.a}36);
       }
     }
     
+    // Rastrear fim da sessão
     window.addEventListener('beforeunload', function() {
-      var ${obfVars.a}19 = Math.floor((Date.now() - ${obfVars.f}.${obfVars.g}) / 1000);
-      ${obfVars.a}2('session_end', {
-        timeOnPage: ${obfVars.a}19,
-        totalClicks: ${obfVars.f}.cl,
-        totalViews: ${obfVars.f}.pv
+      var ${obfVars.a}37 = Math.floor((Date.now() - ${obfVars.m}.${obfVars.n}) / 1000);
+      ${obfVars.a}4('session_end', {
+        timeOnPage: ${obfVars.a}37,
+        totalClicks: ${obfVars.m}.${obfVars.p},
+        totalViews: ${obfVars.m}.${obfVars.o},
+        domain: location.hostname
       });
     });
+    
+    // Adicionar verificações anti-debug
+    setInterval(function() {
+      if (window.devtools && window.devtools.open) {
+        ${obfVars.a}4('debug_detected', { timestamp: Date.now() });
+      }
+    }, 1000);
   }
   
+  // Inicializar quando o DOM estiver pronto
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ${obfVars.a}18);
+    document.addEventListener('DOMContentLoaded', ${obfVars.a}33);
   } else {
-    ${obfVars.a}18();
+    ${obfVars.a}33();
   }
+  
+  // Adicionar proteção contra modificação do script
+  Object.freeze(${obfVars.a});
+  Object.freeze(${obfVars.m});
+  
 })();
 `;
 
-  // Aplicar ofuscação avançada com javascript-obfuscator
+  // Aplicar ofuscação MÁXIMA com javascript-obfuscator
   const obfuscatedResult = JavaScriptObfuscator.obfuscate(rawScript, {
     compact: true,
     controlFlowFlattening: true,
@@ -413,9 +549,9 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
     stringArray: true,
     rotateStringArray: true,
     deadCodeInjection: true,
-    deadCodeInjectionThreshold: 0.4,
-    debugProtection: false,
-    debugProtectionInterval: 0,
+    deadCodeInjectionThreshold: 0.6,
+    debugProtection: true,
+    debugProtectionInterval: 2000,
     disableConsoleOutput: true,
     domainLock: [],
     domainLockRedirectUrl: 'about:blank',
@@ -425,26 +561,26 @@ function generateMainScript(scriptId: string, originalDomain: string, settings: 
     ignoreRequireImports: false,
     inputFileName: '',
     log: false,
-    renameProperties: false,
-    renamePropertiesMode: 'safe',
+    renameProperties: true,
+    renamePropertiesMode: 'unsafe',
     reservedNames: [],
     reservedStrings: [],
-    seed: 0,
+    seed: Math.floor(Math.random() * 1000000),
     sourceMap: false,
     sourceMapBaseUrl: '',
     sourceMapFileName: '',
     sourceMapMode: 'separate',
     sourceMapSourcesMode: 'sources-content',
-    splitStringsChunkLength: 5,
+    splitStringsChunkLength: 3,
     stringArrayCallsTransform: true,
-    stringArrayCallsTransformThreshold: 0.5,
-    stringArrayEncoding: ['base64'],
+    stringArrayCallsTransformThreshold: 1,
+    stringArrayEncoding: ['base64', 'rc4'],
     stringArrayIndexShift: true,
     stringArrayRotate: true,
-    stringArrayWrappersCount: 1,
+    stringArrayWrappersCount: 2,
     stringArrayWrappersChainedCalls: true,
-    stringArrayWrappersParametersMaxCount: 2,
-    stringArrayWrappersType: 'variable',
+    stringArrayWrappersParametersMaxCount: 4,
+    stringArrayWrappersType: 'function',
     target: 'browser',
     unicodeEscapeSequence: false
   });

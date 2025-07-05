@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GlobeIcon, ClipboardCopyIcon, CheckIcon, CodeIcon, SettingsIcon, CopyIcon, ShieldIcon } from 'lucide-react';
+import { GlobeIcon, ClipboardCopyIcon, CheckIcon, CodeIcon, SettingsIcon, CopyIcon, ShieldIcon, SaveIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface ProtectedDomain {
@@ -22,10 +22,11 @@ interface ProtectedDomain {
 
 export function Settings() {
   const [activeTab, setActiveTab] = useState('script');
-  const [selectedDomain, setSelectedDomain] = useState('minhapagina.com.br');
-  const [checkoutUrl, setCheckoutUrl] = useState('https://minhapagina.com.br/checkout');
-  const [redirectUrl, setRedirectUrl] = useState('https://minhapagina.com.br');
+  const [selectedDomain, setSelectedDomain] = useState('');
+  const [checkoutUrl, setCheckoutUrl] = useState('');
+  const [redirectUrl, setRedirectUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
   
   // Script Generator States
   const [domains, setDomains] = useState<ProtectedDomain[]>([]);
@@ -35,27 +36,18 @@ export function Settings() {
   const [showSettings, setShowSettings] = useState(false);
   const [selectedScriptDomain, setSelectedScriptDomain] = useState<ProtectedDomain | null>(null);
 
-  const staticDomains = ['minhapagina.com.br', 'ofertaespecial.com', 'cursoonline.net'];
-  const [domainConfigs, setDomainConfigs] = useState({
-    'minhapagina.com.br': {
-      checkoutUrl: 'https://minhapagina.com.br/checkout',
-      redirectUrl: 'https://minhapagina.com.br'
-    },
-    'ofertaespecial.com': {
-      checkoutUrl: 'https://ofertaespecial.com/checkout',
-      redirectUrl: 'https://ofertaespecial.com'
-    },
-    'cursoonline.net': {
-      checkoutUrl: 'https://cursoonline.net/checkout',
-      redirectUrl: 'https://cursoonline.net'
-    }
-  });
+  useEffect(() => {
+    loadDomains();
+  }, []);
 
   useEffect(() => {
-    if (activeTab === 'generator') {
-      loadDomains();
+    if (domains.length > 0 && !selectedDomain) {
+      const firstDomain = domains[0];
+      setSelectedDomain(firstDomain.domain);
+      setCheckoutUrl(firstDomain.settings.checkout_url || `https://${firstDomain.domain}/checkout`);
+      setRedirectUrl(firstDomain.settings.redirect_url || `https://${firstDomain.domain}`);
     }
-  }, [activeTab]);
+  }, [domains, selectedDomain]);
 
   const loadDomains = async () => {
     try {
@@ -144,64 +136,77 @@ export function Settings() {
     }
   };
 
-  // Gera script ofuscado de máximo 5 linhas SEM TAGS <script>
-  const generateObfuscatedScript = (domain?: ProtectedDomain): string => {
+  const saveCurrentDomainSettings = async () => {
+    if (!selectedDomain) return;
+
+    setSaving(true);
+    try {
+      const domain = domains.find(d => d.domain === selectedDomain);
+      if (!domain) return;
+
+      const newSettings = {
+        ...domain.settings,
+        checkout_url: checkoutUrl,
+        redirect_url: redirectUrl
+      };
+
+      await updateSettings(domain, newSettings);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Gera script loader minimalista e ofuscado (SEM informações sensíveis)
+  const generateObfuscatedLoader = (domain?: ProtectedDomain): string => {
     if (domain) {
-      // Variáveis completamente aleatórias sem referências
+      // Variáveis completamente aleatórias
       const vars = {
         a: Math.random().toString(36).substring(2, 4),
         b: Math.random().toString(36).substring(2, 4),
-        c: Math.random().toString(36).substring(2, 4),
-        d: Math.random().toString(36).substring(2, 4)
+        c: Math.random().toString(36).substring(2, 4)
       };
 
-      // Script ofuscado SEM TAGS, sem referências ao domínio ou ferramenta
-      return `(function(){var ${vars.a}='${domain.script_id}',${vars.b}='${domain.domain}';
-if(location.hostname===${vars.b}){var ${vars.c}=document.createElement('script');
-${vars.c}.src='${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator?scriptId='+${vars.a};
-${vars.c}.async=true;document.head.appendChild(${vars.c});}})();`;
+      // Loader minimalista SEM referências ao domínio ou URLs
+      return `(function(){var ${vars.a}='${domain.script_id}';var ${vars.b}=document.createElement('script');${vars.b}.src='${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator?scriptId='+${vars.a};${vars.b}.async=true;document.head.appendChild(${vars.b});})();`;
     } else {
-      // Script tradicional SEM TAGS para configuração manual
-      return `(function(){var a='${selectedDomain}',b='${checkoutUrl}',c='${redirectUrl}';
-var d=document.createElement('script');d.src='https://alertaclone.com/script.js';
-d.setAttribute('data-domain',a);d.setAttribute('data-checkout',b);
-d.setAttribute('data-redirect',c);d.setAttribute('data-mode','completo');
-document.head.appendChild(d);})();`;
+      // Para domínios da configuração manual, criar um script loader genérico
+      const selectedDomainData = domains.find(d => d.domain === selectedDomain);
+      if (selectedDomainData) {
+        const vars = {
+          a: Math.random().toString(36).substring(2, 4),
+          b: Math.random().toString(36).substring(2, 4),
+          c: Math.random().toString(36).substring(2, 4)
+        };
+
+        return `(function(){var ${vars.a}='${selectedDomainData.script_id}';var ${vars.b}=document.createElement('script');${vars.b}.src='${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator?scriptId='+${vars.a};${vars.b}.async=true;document.head.appendChild(${vars.b});})();`;
+      }
+      
+      return '// Selecione um domínio válido para gerar o script';
     }
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generateObfuscatedScript());
+    navigator.clipboard.writeText(generateObfuscatedLoader());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const copyScript = (domain: ProtectedDomain) => {
-    const script = generateObfuscatedScript(domain);
+    const script = generateObfuscatedLoader(domain);
     navigator.clipboard.writeText(script);
     setScriptCopied(domain.id);
     setTimeout(() => setScriptCopied(null), 2000);
   };
 
-  const handleDomainChange = domain => {
+  const handleDomainChange = (domain: string) => {
     setSelectedDomain(domain);
-    if (domainConfigs[domain]) {
-      setCheckoutUrl(domainConfigs[domain].checkoutUrl);
-      setRedirectUrl(domainConfigs[domain].redirectUrl);
+    const domainData = domains.find(d => d.domain === domain);
+    if (domainData) {
+      setCheckoutUrl(domainData.settings.checkout_url || `https://${domain}/checkout`);
+      setRedirectUrl(domainData.settings.redirect_url || `https://${domain}`);
     }
-  };
-
-  const handleConfigUpdate = (field, value) => {
-    const newConfig = {
-      ...domainConfigs[selectedDomain],
-      [field]: value
-    };
-    setDomainConfigs({
-      ...domainConfigs,
-      [selectedDomain]: newConfig
-    });
-    if (field === 'checkoutUrl') setCheckoutUrl(value);
-    if (field === 'redirectUrl') setRedirectUrl(value);
   };
 
   const tabs = [
@@ -247,165 +252,200 @@ document.head.appendChild(d);})();`;
               onChange={e => handleDomainChange(e.target.value)} 
               className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-gray-200"
             >
-              {staticDomains.map(domain => (
-                <option key={domain} value={domain}>
-                  {domain}
+              <option value="">Selecione um domínio...</option>
+              {domains.map(domain => (
+                <option key={domain.id} value={domain.domain}>
+                  {domain.domain}
                 </option>
               ))}
             </select>
+            {domains.length === 0 && (
+              <p className="text-gray-400 text-sm mt-2">
+                Nenhum domínio encontrado. Crie um domínio na aba "Gerador de Scripts" primeiro.
+              </p>
+            )}
           </section>
 
-          {/* Instructions Section */}
-          <section className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              Como usar seu script de proteção
-            </h2>
-            <p className="text-gray-300 mb-6">
-              Copie o script abaixo e cole na página original do seu site.
-            </p>
-            <div className="space-y-6">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 mt-1">
-                  <span className="text-cyan-400">🧩</span>
+          {selectedDomain && (
+            <>
+              {/* Instructions Section */}
+              <section className="bg-gray-800 rounded-lg p-6">
+                <h2 className="text-lg font-semibold mb-4">
+                  Como usar seu script de proteção
+                </h2>
+                <p className="text-gray-300 mb-6">
+                  Copie o script abaixo e cole na página original do seu site.
+                </p>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <span className="text-cyan-400">🧩</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-200 mb-1">
+                        Recomendação:
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        Insira este código logo antes da tag &lt;/body&gt; ou no &lt;head&gt; do seu HTML.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <span className="text-yellow-400">⚠</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-200 mb-1">
+                        Importante:
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        Esse script carrega dinamicamente a proteção completa do servidor. Todas as URLs e configurações ficam ocultas e ofuscadas.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <span className="text-green-400">🔒</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-200 mb-1">
+                        Segurança:
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        O script principal é gerado dinamicamente e completamente ofuscado. Nenhuma informação sensível fica exposta no código fonte.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-200 mb-1">
-                    Recomendação:
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Insira este código logo antes da tag &lt;/body&gt; ou no &lt;head&gt; do seu HTML.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 mt-1">
-                  <span className="text-yellow-400">⚠</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-200 mb-1">
-                    Importante:
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Esse script valida o domínio de origem e ativa sua proteção contra clonagem. Sem ele, seu site não será monitorado.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 mt-1">
-                  <span className="text-cyan-400">💡</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-200 mb-1">
-                    Dica:
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Se você usa um construtor de sites como Shopify, Wix ou WordPress, procure a seção de "Código personalizado", "Head/Body Scripts" ou "Integrações de terceiros".
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+              </section>
 
-          {/* Script Block - AUTOMATICAMENTE GERADO E PRONTO PARA COPIAR */}
-          <section className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Script Gerado Automaticamente</h2>
-              <div className="flex items-center space-x-2">
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
-                  ✓ Pronto para usar
-                </span>
-                <button 
-                  onClick={handleCopy} 
-                  className="flex items-center px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white transition-colors"
-                >
-                  {copied ? (
-                    <>
-                      <CheckIcon size={14} className="mr-1" />
-                      Copiado!
-                    </>
-                  ) : (
-                    <>
-                      <ClipboardCopyIcon size={14} className="mr-1" />
-                      Copiar Script
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-            
-            <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm relative group border-2 border-cyan-500/30">
-              <div className="absolute top-2 left-2">
-                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-cyan-900/50 text-cyan-300 border border-cyan-500/50">
-                  SCRIPT ATIVO
-                </span>
-              </div>
-              
-              <button 
-                onClick={handleCopy} 
-                className="absolute top-3 right-3 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-200 opacity-100" 
-                title="Copiar Script"
-              >
-                {copied ? (
-                  <CheckIcon size={16} className="text-green-400" />
-                ) : (
-                  <ClipboardCopyIcon size={16} className="text-cyan-400 hover:text-cyan-300" />
-                )}
-              </button>
-              
-              <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8 break-all">
-                {generateObfuscatedScript()}
-              </pre>
-            </div>
-            
-            <div className="mt-4 p-3 bg-cyan-900/20 border border-cyan-500/30 rounded-lg">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <span className="text-cyan-400">⚡</span>
+              {/* Script Block - LOADER OFUSCADO */}
+              <section className="bg-gray-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Script Loader Ofuscado</h2>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
+                      ✓ Máxima Segurança
+                    </span>
+                    <button 
+                      onClick={handleCopy} 
+                      className="flex items-center px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white transition-colors"
+                    >
+                      {copied ? (
+                        <>
+                          <CheckIcon size={14} className="mr-1" />
+                          Copiado!
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardCopyIcon size={14} className="mr-1" />
+                          Copiar Script
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-cyan-300 font-medium">
-                    Script ofuscado configurado para: {selectedDomain}
-                  </p>
-                  <p className="text-xs text-cyan-400/80 mt-1">
-                    Este script está completamente ofuscado, sem referências ao domínio ou ferramenta. Máximo 5 linhas, pronto para ser copiado e colado no seu site.
-                  </p>
+                
+                <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm relative group border-2 border-green-500/30">
+                  <div className="absolute top-2 left-2">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-900/50 text-green-300 border border-green-500/50">
+                      SCRIPT LOADER SEGURO
+                    </span>
+                  </div>
+                  
+                  <button 
+                    onClick={handleCopy} 
+                    className="absolute top-3 right-3 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-200 opacity-100" 
+                    title="Copiar Script"
+                  >
+                    {copied ? (
+                      <CheckIcon size={16} className="text-green-400" />
+                    ) : (
+                      <ClipboardCopyIcon size={16} className="text-cyan-400 hover:text-cyan-300" />
+                    )}
+                  </button>
+                  
+                  <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8 break-all">
+                    {generateObfuscatedLoader()}
+                  </pre>
                 </div>
-              </div>
-            </div>
-          </section>
+                
+                <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <span className="text-green-400">🔐</span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-green-300 font-medium">
+                        Script loader para: {selectedDomain}
+                      </p>
+                      <p className="text-xs text-green-400/80 mt-1">
+                        Este é apenas um carregador. O script principal com todas as configurações é gerado dinamicamente pelo servidor e completamente ofuscado. Nenhuma URL ou configuração sensível fica exposta.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
 
-          {/* Configuration Block */}
-          <section className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              Configurações para {selectedDomain}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Link de Checkout Principal
-                </label>
-                <input 
-                  type="url" 
-                  value={checkoutUrl} 
-                  onChange={e => handleConfigUpdate('checkoutUrl', e.target.value)} 
-                  placeholder="https://seusite.com/checkout" 
-                  className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Redirecionar visitante para este domínio
-                </label>
-                <input 
-                  type="url" 
-                  value={redirectUrl} 
-                  onChange={e => handleConfigUpdate('redirectUrl', e.target.value)} 
-                  placeholder="https://seusite.com" 
-                  className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
-                />
-              </div>
-            </div>
-          </section>
+              {/* Configuration Block */}
+              <section className="bg-gray-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">
+                    Configurações para {selectedDomain}
+                  </h2>
+                  <button
+                    onClick={saveCurrentDomainSettings}
+                    disabled={saving}
+                    className="flex items-center px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <SaveIcon size={16} className="mr-2" />
+                        Salvar
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Link de Checkout Principal
+                    </label>
+                    <input 
+                      type="url" 
+                      value={checkoutUrl} 
+                      onChange={e => setCheckoutUrl(e.target.value)} 
+                      placeholder="https://seusite.com/checkout" 
+                      className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Esta URL será ofuscada no script principal e usada para substituir links de checkout em clones.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Redirecionar visitante para este domínio
+                    </label>
+                    <input 
+                      type="url" 
+                      value={redirectUrl} 
+                      onChange={e => setRedirectUrl(e.target.value)} 
+                      placeholder="https://seusite.com" 
+                      className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Esta URL será ofuscada no script principal e usada para redirecionar visitantes de clones.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
         </div>
       )}
 
@@ -415,7 +455,7 @@ document.head.appendChild(d);})();`;
             <div>
               <h2 className="text-xl font-bold mb-1">Gerador de Scripts Anti-Clonagem</h2>
               <p className="text-gray-400">
-                Crie scripts ofuscados para proteger seus domínios contra clonagem
+                Crie scripts completamente ofuscados para proteger seus domínios contra clonagem
               </p>
             </div>
           </div>
@@ -520,13 +560,13 @@ document.head.appendChild(d);})();`;
                       </div>
                     </div>
 
-                    {/* Script Ofuscado - AUTOMATICAMENTE GERADO E PRONTO PARA COPIAR */}
-                    <div className="bg-gray-900 rounded-lg p-3 font-mono text-sm border border-cyan-500/30">
+                    {/* Script Loader Ofuscado */}
+                    <div className="bg-gray-900 rounded-lg p-3 font-mono text-sm border border-green-500/30">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center space-x-2">
-                          <span className="text-gray-400 text-xs">Script Ofuscado (5 linhas):</span>
+                          <span className="text-gray-400 text-xs">Script Loader Ofuscado:</span>
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400">
-                            ✓ Pronto
+                            ✓ Máxima Segurança
                           </span>
                         </div>
                         <button
@@ -547,8 +587,14 @@ document.head.appendChild(d);})();`;
                         </button>
                       </div>
                       <pre className="text-gray-300 text-xs overflow-x-auto whitespace-pre-wrap break-all">
-                        {generateObfuscatedScript(domain)}
+                        {generateObfuscatedLoader(domain)}
                       </pre>
+                    </div>
+                    
+                    <div className="mt-2 p-2 bg-green-900/10 border border-green-500/20 rounded-lg">
+                      <p className="text-xs text-green-400/80">
+                        🔐 Este loader carrega dinamicamente o script principal ofuscado do servidor. Todas as URLs e configurações ficam completamente ocultas.
+                      </p>
                     </div>
                   </div>
                 ))}
