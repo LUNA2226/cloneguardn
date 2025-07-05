@@ -589,7 +589,7 @@ export function Settings() {
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="text-cyan-400 mt-1">2.</span>
-                    <p>Paste it into your website's HTML, preferably just before the closing <code className="bg-gray-600 px-1 py-0.5 rounded"></body></code> tag</p>
+                    <p>Paste it into your website's HTML, preferably just before the closing <code className="bg-gray-600 px-1 py-0.5 rounded">{'</body>'}</code> tag</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="text-cyan-400 mt-1">3.</span>
