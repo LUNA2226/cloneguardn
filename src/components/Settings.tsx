@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GlobeIcon, CopyIcon, CheckIcon, CodeIcon, ShieldIcon, UserIcon, CreditCardIcon } from 'lucide-react';
+import { GlobeIcon, CopyIcon, CheckIcon, CodeIcon, ShieldIcon, UserIcon, CreditCardIcon, SettingsIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface ProtectedDomain {
@@ -26,6 +26,181 @@ interface UserPlan {
   email: string;
 }
 
+interface SettingsModalProps {
+  domain: ProtectedDomain;
+  onClose: () => void;
+  onSave: (settings: any) => void;
+}
+
+function SettingsModal({ domain, onClose, onSave }: SettingsModalProps) {
+  const [settings, setSettings] = useState(domain.settings);
+
+  const handleSave = () => {
+    onSave(settings);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">Protection Settings</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Automatic Redirect */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">Automatic Redirect</h3>
+                <p className="text-sm text-gray-400">
+                  Redirects clone visitors to the original site
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.redirect}
+                  onChange={(e) => setSettings({...settings, redirect: e.target.checked})}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+              </label>
+            </div>
+            {settings.redirect && (
+              <input
+                type="url"
+                value={settings.redirect_url}
+                onChange={(e) => setSettings({...settings, redirect_url: e.target.value})}
+                placeholder="https://yoursite.com"
+                className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              />
+            )}
+          </div>
+
+          {/* Visual Sabotage */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Visual Sabotage</h3>
+              <p className="text-sm text-gray-400">
+                Applies effects that break the clone's layout
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.visual_sabotage}
+                onChange={(e) => setSettings({...settings, visual_sabotage: e.target.checked})}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+            </label>
+          </div>
+
+          {/* Replace Links */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">Replace Checkout Links</h3>
+                <p className="text-sm text-gray-400">
+                  Replaces purchase links with the correct ones
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.replace_links}
+                  onChange={(e) => setSettings({...settings, replace_links: e.target.checked})}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+              </label>
+            </div>
+            {settings.replace_links && (
+              <input
+                type="url"
+                value={settings.checkout_url}
+                onChange={(e) => setSettings({...settings, checkout_url: e.target.value})}
+                placeholder="https://yoursite.com/checkout"
+                className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              />
+            )}
+          </div>
+
+          {/* Replace Images */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">Replace Images</h3>
+                <p className="text-sm text-gray-400">
+                  Replaces all images with a custom image
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.replace_images}
+                  onChange={(e) => setSettings({...settings, replace_images: e.target.checked})}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+              </label>
+            </div>
+            {settings.replace_images && (
+              <input
+                type="url"
+                value={settings.replacement_image_url}
+                onChange={(e) => setSettings({...settings, replacement_image_url: e.target.value})}
+                placeholder="https://example.com/warning-image.jpg"
+                className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              />
+            )}
+          </div>
+
+          {/* Visual Interference */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Visual Interference</h3>
+              <p className="text-sm text-gray-400">
+                Applies visual effects that make the clone difficult to use
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.visual_interference}
+                onChange={(e) => setSettings({...settings, visual_interference: e.target.checked})}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+            </label>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-8">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-300 hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500"
+          >
+            Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Settings() {
   const [selectedDomain, setSelectedDomain] = useState('');
   const [domains, setDomains] = useState<ProtectedDomain[]>([]);
@@ -33,6 +208,8 @@ export function Settings() {
   const [copied, setCopied] = useState(false);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [planLimits, setPlanLimits] = useState({ current: 0, max: 0 });
+  const [showSettings, setShowSettings] = useState(false);
+  const [selectedScriptDomain, setSelectedScriptDomain] = useState<ProtectedDomain | null>(null);
 
   // Plan limits mapping
   const PLAN_LIMITS = {
@@ -113,6 +290,39 @@ export function Settings() {
       setDomains([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateSettings = async (domain: ProtectedDomain, newSettings: any) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`;
+
+      const requestBody = {
+        scriptId: domain.script_id,
+        settings: newSettings
+      };
+
+      const response = await fetch(functionUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        loadDomains();
+        setShowSettings(false);
+      } else {
+        const errorText = await response.text();
+        console.error('Update settings error:', errorText);
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error);
     }
   };
 
@@ -242,9 +452,23 @@ export function Settings() {
             <div className="space-y-6">
               {/* Domain Selector */}
               <div>
-                <div className="flex items-center mb-4">
-                  <GlobeIcon className="text-cyan-400 mr-2" size={20} />
-                  <h3 className="text-lg font-semibold">Select Domain</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <GlobeIcon className="text-cyan-400 mr-2" size={20} />
+                    <h3 className="text-lg font-semibold">Select Domain</h3>
+                  </div>
+                  {selectedDomainData && (
+                    <button
+                      onClick={() => {
+                        setSelectedScriptDomain(selectedDomainData);
+                        setShowSettings(true);
+                      }}
+                      className="flex items-center px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
+                    >
+                      <SettingsIcon size={16} className="mr-2" />
+                      Configure Protection
+                    </button>
+                  )}
                 </div>
                 <select 
                   value={selectedDomain} 
@@ -311,39 +535,41 @@ export function Settings() {
                 </div>
               )}
 
-              {/* Script Display and Copy */}
+              {/* Script Display */}
               <div className="bg-gray-900 rounded-lg p-4 border border-green-500/30">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 text-sm font-medium">Obfuscated Script Loader:</span>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400">
-                      ✓ Maximum Security
-                    </span>
-                  </div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <span className="text-gray-400 text-sm font-medium">Obfuscated Script Loader:</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400">
+                    ✓ Maximum Security
+                  </span>
+                </div>
+                
+                <pre className="text-gray-300 text-sm overflow-x-auto whitespace-pre-wrap break-all bg-gray-800 p-3 rounded border mb-4">
+                  {selectedDomain ? generateObfuscatedLoader() : '// Select a domain to generate the script'}
+                </pre>
+                
+                {/* Copy Button Below Script */}
+                <div className="flex justify-center">
                   <button
                     onClick={handleCopy}
                     disabled={!selectedDomain}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {copied ? (
                       <>
-                        <CheckIcon size={16} />
-                        Copied!
+                        <CheckIcon size={18} />
+                        Script Copied!
                       </>
                     ) : (
                       <>
-                        <CopyIcon size={16} />
+                        <CopyIcon size={18} />
                         Copy Script
                       </>
                     )}
                   </button>
                 </div>
                 
-                <pre className="text-gray-300 text-sm overflow-x-auto whitespace-pre-wrap break-all bg-gray-800 p-3 rounded border">
-                  {selectedDomain ? generateObfuscatedLoader() : '// Select a domain to generate the script'}
-                </pre>
-                
-                <div className="mt-3 p-3 bg-green-900/10 border border-green-500/20 rounded-lg">
+                <div className="mt-4 p-3 bg-green-900/10 border border-green-500/20 rounded-lg">
                   <p className="text-xs text-green-400/80">
                     🔐 This loader dynamically loads the obfuscated main script from the server. All URLs and configurations are completely hidden.
                   </p>
@@ -363,11 +589,15 @@ export function Settings() {
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="text-cyan-400 mt-1">2.</span>
-                    <p>Paste it into your website's HTML, preferably just before the closing <code className="bg-gray-600 px-1 py-0.5 rounded">&lt;/body&gt;</code> tag</p>
+                    <p>Paste it into your website's HTML, preferably just before the closing <code className="bg-gray-600 px-1 py-0.5 rounded"></body></code> tag</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="text-cyan-400 mt-1">3.</span>
                     <p>The script will automatically protect your site and detect any cloning attempts</p>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-cyan-400 mt-1">4.</span>
+                    <p>Use the "Configure Protection" button to customize which protection features are active</p>
                   </div>
                 </div>
                 
@@ -380,6 +610,15 @@ export function Settings() {
             </div>
           )}
         </section>
+
+        {/* Settings Modal */}
+        {showSettings && selectedScriptDomain && (
+          <SettingsModal
+            domain={selectedScriptDomain}
+            onClose={() => setShowSettings(false)}
+            onSave={(newSettings) => updateSettings(selectedScriptDomain, newSettings)}
+          />
+        )}
       </div>
     </div>
   );
