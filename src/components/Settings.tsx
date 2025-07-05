@@ -463,10 +463,10 @@ export function Settings() {
                         setSelectedScriptDomain(selectedDomainData);
                         setShowSettings(true);
                       }}
-                      className="flex items-center px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
+                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                      title="Configure Protection"
                     >
-                      <SettingsIcon size={16} className="mr-2" />
-                      Configure Protection
+                      <SettingsIcon size={16} />
                     </button>
                   )}
                 </div>
