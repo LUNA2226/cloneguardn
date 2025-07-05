@@ -537,37 +537,26 @@ export function Settings() {
 
               {/* Script Display */}
               <div className="bg-gray-900 rounded-lg p-4 border border-green-500/30">
-                <div className="flex items-center space-x-2 mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={handleCopy}
+                    disabled={!selectedDomain}
+                    className="p-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={copied ? "Script Copied!" : "Copy Script"}
+                  >
+                    {copied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
+                  </button>
+                  <div className="flex items-center space-x-2">
                   <span className="text-gray-400 text-sm font-medium">Obfuscated Script Loader:</span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400">
                     ✓ Maximum Security
                   </span>
+                  </div>
                 </div>
                 
                 <pre className="text-gray-300 text-sm overflow-x-auto whitespace-pre-wrap break-all bg-gray-800 p-3 rounded border mb-4">
                   {selectedDomain ? generateObfuscatedLoader() : '// Select a domain to generate the script'}
                 </pre>
-                
-                {/* Copy Button Below Script */}
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleCopy}
-                    disabled={!selectedDomain}
-                    className="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {copied ? (
-                      <>
-                        <CheckIcon size={18} />
-                        Script Copied!
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon size={18} />
-                        Copy Script
-                      </>
-                    )}
-                  </button>
-                </div>
                 
                 <div className="mt-4 p-3 bg-green-900/10 border border-green-500/20 rounded-lg">
                   <p className="text-xs text-green-400/80">
