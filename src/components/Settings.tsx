@@ -517,60 +517,62 @@ export function Settings() {
         </section>
 
         {selectedDomain && (
-        {/* Script Usage Instructions */}
-        <section className="bg-gray-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <CodeIcon className="mr-2 text-cyan-400" size={20} />
-            How to Use Your Protection Script
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="bg-gray-750 rounded-lg p-4 border border-gray-600">
-              <h4 className="font-medium text-white mb-2">📋 Step-by-Step Instructions:</h4>
-              <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                <li>Copy the obfuscated script from your protected domain above</li>
-                <li>Open your website's HTML file or template</li>
-                <li>Paste the script in one of these locations:</li>
-              </ol>
+          <>
+            {/* Script Usage Instructions */}
+            <section className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <CodeIcon className="mr-2 text-cyan-400" size={20} />
+                How to Use Your Protection Script
+              </h3>
               
-              <div className="mt-3 ml-6 space-y-2">
-                <div className="flex items-start space-x-2">
-                  <span className="text-cyan-400 mt-1">•</span>
-                  <div>
-                    <span className="font-medium text-gray-200">Recommended:</span>
-                    <span className="text-gray-300"> Just before the closing </span>
-                    <code className="bg-gray-600 px-1 py-0.5 rounded text-xs">&lt;/body&gt;</code>
-                    <span className="text-gray-300"> tag</span>
+              <div className="space-y-4">
+                <div className="bg-gray-750 rounded-lg p-4 border border-gray-600">
+                  <h4 className="font-medium text-white mb-2">📋 Step-by-Step Instructions:</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-gray-300">
+                    <li>Copy the obfuscated script from your protected domain above</li>
+                    <li>Open your website's HTML file or template</li>
+                    <li>Paste the script in one of these locations:</li>
+                  </ol>
+                  
+                  <div className="mt-3 ml-6 space-y-2">
+                    <div className="flex items-start space-x-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <div>
+                        <span className="font-medium text-gray-200">Recommended:</span>
+                        <span className="text-gray-300"> Just before the closing </span>
+                        <code className="bg-gray-600 px-1 py-0.5 rounded text-xs"></body></code>
+                        <span className="text-gray-300"> tag</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <div>
+                        <span className="font-medium text-gray-200">Alternative:</span>
+                        <span className="text-gray-300"> Inside the </span>
+                        <code className="bg-gray-600 px-1 py-0.5 rounded text-xs"><head></code>
+                        <span className="text-gray-300"> section</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-cyan-400 mt-1">•</span>
-                  <div>
-                    <span className="font-medium text-gray-200">Alternative:</span>
-                    <span className="text-gray-300"> Inside the </span>
-                    <code className="bg-gray-600 px-1 py-0.5 rounded text-xs">&lt;head&gt;</code>
-                    <span className="text-gray-300"> section</span>
+                
+                <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-green-400 text-lg">🔐</span>
+                    <div>
+                      <h4 className="font-medium text-green-300 mb-1">Security Features:</h4>
+                      <ul className="text-sm text-green-400/80 space-y-1">
+                        <li>• Script is completely obfuscated and secure</li>
+                        <li>• All configurations are hidden from source code</li>
+                        <li>• Protection activates automatically when clones are detected</li>
+                        <li>• No sensitive URLs or data exposed to visitors</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <span className="text-green-400 text-lg">🔐</span>
-                <div>
-                  <h4 className="font-medium text-green-300 mb-1">Security Features:</h4>
-                  <ul className="text-sm text-green-400/80 space-y-1">
-                    <li>• Script is completely obfuscated and secure</li>
-                    <li>• All configurations are hidden from source code</li>
-                    <li>• Protection activates automatically when clones are detected</li>
-                    <li>• No sensitive URLs or data exposed to visitors</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          </>
 
         {/* Settings Modal */}
         {showSettings && selectedScriptDomain && (
