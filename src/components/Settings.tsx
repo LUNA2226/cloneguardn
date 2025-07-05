@@ -37,8 +37,10 @@ export function Settings() {
   const [selectedScriptDomain, setSelectedScriptDomain] = useState<ProtectedDomain | null>(null);
 
   useEffect(() => {
-    loadDomains();
-  }, []);
+    if (activeTab === 'generator') {
+      loadDomains();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (domains.length > 0 && !selectedDomain) {
@@ -51,6 +53,7 @@ export function Settings() {
 
   const loadDomains = async () => {
     try {
+      setLoading(true);
       // Debug environment variables
       console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
       console.log('Supabase Anon Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
@@ -58,6 +61,7 @@ export function Settings() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No active session found');
+        setLoading(false);
         return;
       }
 
@@ -81,6 +85,7 @@ export function Settings() {
       } else {
         const errorText = await response.text();
         console.error('Function response error:', errorText);
+        setDomains([]);
       }
     } catch (error) {
       console.error('Error loading domains:', error);
@@ -89,6 +94,9 @@ export function Settings() {
         stack: error.stack,
         name: error.name
       });
+      setDomains([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -520,12 +528,30 @@ export function Settings() {
 
       {activeTab === 'generator' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold mb-1">Gerador de Scripts Anti-Clonagem</h2>
-              <p className="text-gray-400">
-                Crie scripts completamente ofuscados para proteger seus domínios contra clonagem
-              </p>
+          {/* Header com informações de debug */}
+          <div className="bg-gray-800 rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-xl font-bold mb-1">Gerador de Scripts Anti-Clonagem</h2>
+                <p className="text-gray-400">
+                  Crie scripts completamente ofuscados para proteger seus domínios contra clonagem
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-400">
+                  Status: {loading ? 'Carregando...' : 'Pronto'}
+                </div>
+                <div className="text-sm text-gray-400">
+                  Domínios: {domains.length}
+                </div>
+              </div>
+            </div>
+            
+            {/* Debug info */}
+            <div className="bg-gray-750 rounded-lg p-3 text-xs text-gray-400">
+              <div>Supabase URL: {import.meta.env.VITE_SUPABASE_URL ? '✓ Configurado' : '✗ Não configurado'}</div>
+              <div>Supabase Key: {import.meta.env.VITE_SUPABASE_ANON_KEY ? '✓ Configurado' : '✗ Não configurado'}</div>
+              <div>Função URL: {import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator</div>
             </div>
           </div>
 
@@ -536,21 +562,28 @@ export function Settings() {
               Criar Novo Script de Proteção
             </h3>
             
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={newDomain}
-                onChange={(e) => setNewDomain(e.target.value)}
-                placeholder="exemplo.com"
-                className="flex-1 px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              />
-              <button
-                onClick={createScript}
-                disabled={loading || !newDomain.trim()}
-                className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Gerando...' : 'Gerar Script'}
-              </button>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  value={newDomain}
+                  onChange={(e) => setNewDomain(e.target.value)}
+                  placeholder="exemplo.com"
+                  className="flex-1 px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                />
+                <button
+                  onClick={createScript}
+                  disabled={loading || !newDomain.trim()}
+                  className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Gerando...' : 'Gerar Script'}
+                </button>
+              </div>
+              
+              <div className="text-sm text-gray-400">
+                <p>💡 Digite apenas o domínio (ex: meusite.com) sem https:// ou www</p>
+                <p>🔒 O script gerado será completamente ofuscado e seguro</p>
+              </div>
             </div>
           </div>
 
@@ -562,10 +595,26 @@ export function Settings() {
             </h3>
 
             {domains.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-12 text-gray-400">
                 <CodeIcon size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Nenhum script criado ainda</p>
-                <p className="text-sm">Adicione um domínio acima para começar</p>
+                <h4 className="text-lg font-medium mb-2">Nenhum script criado ainda</h4>
+                <p className="text-sm mb-4">Adicione um domínio acima para começar a gerar scripts de proteção</p>
+                
+                {loading && (
+                  <div className="flex items-center justify-center mt-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cyan-400 mr-2"></div>
+                    <span>Carregando domínios...</span>
+                  </div>
+                )}
+                
+                {!loading && (
+                  <button
+                    onClick={loadDomains}
+                    className="mt-4 px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    🔄 Recarregar Domínios
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
