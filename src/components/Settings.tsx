@@ -30,7 +30,6 @@ export function Settings() {
   const [selectedDomain, setSelectedDomain] = useState('');
   const [checkoutUrl, setCheckoutUrl] = useState('');
   const [redirectUrl, setRedirectUrl] = useState('');
-  const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   
   // Script Generator States
@@ -265,12 +264,6 @@ export function Settings() {
       
       return '// Select a valid domain to generate the script';
     }
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generateObfuscatedLoader());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const copyScript = (domain: ProtectedDomain) => {
@@ -557,124 +550,7 @@ export function Settings() {
 
         {selectedDomain && (
           <>
-            {/* Instructions Section */}
-            <section className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-lg font-semibold mb-4">
-                How to use your protection script
-              </h2>
-              <p className="text-gray-300 mb-6">
-                Copy the script below and paste it into the original page of your website.
-              </p>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
-                    <span className="text-cyan-400">🧩</span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-200 mb-1">
-                      Recommendation:
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Insert this code just before the closing &lt;/body&gt; tag or in the &lt;head&gt; of your HTML.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
-                    <span className="text-yellow-400">⚠</span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-200 mb-1">
-                      Important:
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      This script dynamically loads the complete protection from the server. All URLs and configurations remain hidden and obfuscated.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
-                    <span className="text-green-400">🔒</span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-200 mb-1">
-                      Security:
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      The main script is dynamically generated and completely obfuscated. No sensitive information is exposed in the source code.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
 
-            {/* Script Block - OBFUSCATED LOADER */}
-            <section className="bg-gray-800 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Obfuscated Script Loader</h2>
-                <div className="flex items-center space-x-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
-                    ✓ Maximum Security
-                  </span>
-                  <button 
-                    onClick={handleCopy} 
-                    className="flex items-center px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white transition-colors"
-                  >
-                    {copied ? (
-                      <>
-                        <CheckIcon size={14} className="mr-1" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <ClipboardCopyIcon size={14} className="mr-1" />
-                        Copy Script
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm relative group border-2 border-green-500/30">
-                <div className="absolute top-2 left-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-900/50 text-green-300 border border-green-500/50">
-                    SECURE SCRIPT LOADER
-                  </span>
-                </div>
-                
-                <button 
-                  onClick={handleCopy} 
-                  className="absolute top-3 right-3 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-200 opacity-100" 
-                  title="Copy Script"
-                >
-                  {copied ? (
-                    <CheckIcon size={16} className="text-green-400" />
-                  ) : (
-                    <ClipboardCopyIcon size={16} className="text-cyan-400 hover:text-cyan-300" />
-                  )}
-                </button>
-                
-                <pre className="whitespace-pre-wrap text-gray-300 pr-12 pt-8 break-all">
-                  {generateObfuscatedLoader()}
-                </pre>
-              </div>
-              
-              <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <span className="text-green-400">🔐</span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-green-300 font-medium">
-                      Script loader for: {selectedDomain}
-                    </p>
-                    <p className="text-xs text-green-400/80 mt-1">
-                      This is just a loader. The main script with all configurations is dynamically generated by the server and completely obfuscated. No sensitive URLs or configurations are exposed.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
 
             {/* Configuration Block */}
             <section className="bg-gray-800 rounded-lg p-6">
