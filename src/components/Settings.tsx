@@ -540,7 +540,7 @@ export function Settings() {
                       <div>
                         <span className="font-medium text-gray-200">Recommended:</span>
                         <span className="text-gray-300"> Just before the closing </span>
-                        <code className="bg-gray-600 px-1 py-0.5 rounded text-xs"></body></code>
+                        <code className="bg-gray-600 px-1 py-0.5 rounded text-xs">&lt;/body&gt;</code>
                         <span className="text-gray-300"> tag</span>
                       </div>
                     </div>
@@ -549,7 +549,7 @@ export function Settings() {
                       <div>
                         <span className="font-medium text-gray-200">Alternative:</span>
                         <span className="text-gray-300"> Inside the </span>
-                        <code className="bg-gray-600 px-1 py-0.5 rounded text-xs"><head></code>
+                        <code className="bg-gray-600 px-1 py-0.5 rounded text-xs">&lt;head&gt;</code>
                         <span className="text-gray-300"> section</span>
                       </div>
                     </div>
