@@ -2,31 +2,40 @@ import React, { useState } from 'react';
 import { ShieldIcon, PlusIcon, AlertCircleIcon } from 'lucide-react';
 import { AddDomainModal } from './AddDomainModal';
 import { ProtectionModal } from './ProtectionModal';
+import { supabase } from '../lib/supabase';
 export function ProtectedDomains() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isProtectionModalOpen, setIsProtectionModalOpen] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState(null);
-  const domains = [{
-    id: 1,
-    domain: 'minhapagina.com.br',
-    status: 'protected',
-    lastCheck: '2 min atrás',
-    threats: 0
-  }, {
-    id: 2,
-    domain: 'ofertaespecial.com',
-    status: 'alert',
-    lastCheck: '5 min atrás',
-    threats: 3
-  }, {
-    id: 3,
-    domain: 'cursoonline.net',
+  const [domains, setDomains] = useState([]);
+  const [loading, setLoading] = useState(true);
+  React.useEffect(() => {
+    loadDomains();
+  }, []);
+
+  const loadDomains = async () => {
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
     status: 'protected',
     lastCheck: '1 hora atrás',
     threats: 0
   }];
   const handleProtectionClick = domain => {
     setSelectedDomain(domain);
+  const handleDomainAdded = () => {
+    loadDomains();
+  };
     setIsProtectionModalOpen(true);
   };
   return <div className="p-6">
@@ -43,13 +52,31 @@ export function ProtectedDomains() {
             <div className="flex items-center">
               <ShieldIcon className="text-cyan-400 mr-2" size={20} />
               <span className="text-sm text-gray-400">
-                3/5 protected domains
+                {domains.length}/5 protected domains
               </span>
             </div>
             <span className="text-xs text-gray-500">Premium Plan</span>
           </div>
         </div>
         <table className="w-full">
+        {loading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading domains...</p>
+          </div>
+        ) : domains.length === 0 ? (
+          <div className="p-8 text-center">
+            <ShieldIcon size={48} className="mx-auto mb-4 text-gray-600" />
+            <h3 className="text-lg font-medium text-gray-300 mb-2">No Protected Domains</h3>
+            <p className="text-gray-400 mb-4">Add your first domain to start protecting it against cloning.</p>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500"
+            >
+              Add Your First Domain
+            </button>
+          </div>
+        ) : (
           <thead>
             <tr className="bg-gray-700">
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
@@ -59,10 +86,10 @@ export function ProtectedDomains() {
                 Status
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Last Check
+                Created
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Threats
+                Active
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
                 Actions
@@ -78,28 +105,27 @@ export function ProtectedDomains() {
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${domain.status === 'protected' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
-                    {domain.status === 'protected' ? 'Protected' : 'Alert'}
-                  </span>
+                    {domain.is_active ? 'Protected' : 'Inactive'}
+                    domain.is_active 
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-300">
-                  {domain.lastCheck}
+                  {new Date(domain.created_at).toLocaleDateString()}
                 </td>
-                <td className="px-4 py-3 text-sm">
-                  {domain.threats > 0 ? <div className="flex items-center text-red-400">
-                      <AlertCircleIcon size={16} className="mr-1" />
-                      {domain.threats} detected
-                    </div> : <span className="text-gray-400">None</span>}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <button onClick={() => handleProtectionClick(domain)} className="px-3 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-500">
+                  <span className={domain.is_active ? 'text-green-400' : 'text-gray-400'}>
+                    {domain.is_active ? 'Yes' : 'No'}
+                  </span>
                     Protection
                   </button>
                 </td>
               </tr>)}
           </tbody>
         </table>
+        )}
       </div>
       {isAddModalOpen && <AddDomainModal onClose={() => setIsAddModalOpen(false)} />}
       {isProtectionModalOpen && <ProtectionModal domain={selectedDomain} onClose={() => setIsProtectionModalOpen(false)} />}
-    </div>;
+        <AddDomainModal 
+          onClose={() => setIsAddModalOpen(false)} 
+          onDomainAdded={handleDomainAdded}
+        />
 }
