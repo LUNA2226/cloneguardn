@@ -27,17 +27,24 @@ export function ProtectedDomains() {
 
       if (response.ok) {
         const data = await response.json();
-    status: 'protected',
-    lastCheck: '1 hora atrás',
-    threats: 0
-  }];
+        setDomains(data.domains || []);
+      }
+    } catch (error) {
+      console.error('Error loading domains:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleProtectionClick = domain => {
     setSelectedDomain(domain);
+    setIsProtectionModalOpen(true);
+  };
+
   const handleDomainAdded = () => {
     loadDomains();
   };
-    setIsProtectionModalOpen(true);
-  };
+
   return <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Protected Domains</h1>
