@@ -51,21 +51,44 @@ export function Settings() {
 
   const loadDomains = async () => {
     try {
+      // Debug environment variables
+      console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+      console.log('Supabase Anon Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        console.log('No active session found');
+        return;
+      }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`, {
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`;
+      console.log('Calling function URL:', functionUrl);
+
+      const response = await fetch(functionUrl, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
         },
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('Domains loaded:', data.domains?.length || 0);
         setDomains(data.domains);
+      } else {
+        const errorText = await response.text();
+        console.error('Function response error:', errorText);
       }
     } catch (error) {
       console.error('Error loading domains:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
     }
   };
 
@@ -74,37 +97,60 @@ export function Settings() {
 
     setLoading(true);
     try {
+      console.log('Creating script for domain:', newDomain.trim());
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        console.log('No active session found for script creation');
+        return;
+      }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`, {
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`;
+      console.log('Creating script at URL:', functionUrl);
+
+      const requestBody = {
+        domain: newDomain.trim(),
+        settings: {
+          redirect: true,
+          visual_sabotage: false,
+          replace_links: true,
+          replace_images: false,
+          visual_interference: false,
+          redirect_url: `https://${newDomain.trim()}`,
+          replacement_image_url: '',
+          checkout_url: `https://${newDomain.trim()}/checkout`
+        }
+      };
+      
+      console.log('Request body:', requestBody);
+
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          domain: newDomain.trim(),
-          settings: {
-            redirect: true,
-            visual_sabotage: false,
-            replace_links: true,
-            replace_images: false,
-            visual_interference: false,
-            redirect_url: `https://${newDomain.trim()}`,
-            replacement_image_url: '',
-            checkout_url: `https://${newDomain.trim()}/checkout`
-          }
-        }),
+        body: JSON.stringify(requestBody),
       });
+
+      console.log('Create script response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Script created successfully:', data);
         setNewDomain('');
         loadDomains();
+      } else {
+        const errorText = await response.text();
+        console.error('Create script error:', errorText);
       }
     } catch (error) {
       console.error('Error creating script:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
     } finally {
       setLoading(false);
     }
@@ -112,27 +158,50 @@ export function Settings() {
 
   const updateSettings = async (domain: ProtectedDomain, newSettings: any) => {
     try {
+      console.log('Updating settings for domain:', domain.domain);
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        console.log('No active session found for settings update');
+        return;
+      }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`, {
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/script-generator`;
+      console.log('Updating settings at URL:', functionUrl);
+
+      const requestBody = {
+        scriptId: domain.script_id,
+        settings: newSettings
+      };
+      
+      console.log('Update request body:', requestBody);
+
+      const response = await fetch(functionUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          scriptId: domain.script_id,
-          settings: newSettings
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('Update settings response status:', response.status);
+
       if (response.ok) {
+        console.log('Settings updated successfully');
         loadDomains();
         setShowSettings(false);
+      } else {
+        const errorText = await response.text();
+        console.error('Update settings error:', errorText);
       }
     } catch (error) {
       console.error('Error updating settings:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
     }
   };
 
