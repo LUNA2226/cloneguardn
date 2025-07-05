@@ -28,9 +28,6 @@ interface UserPlan {
 
 export function Settings() {
   const [selectedDomain, setSelectedDomain] = useState('');
-  const [checkoutUrl, setCheckoutUrl] = useState('');
-  const [redirectUrl, setRedirectUrl] = useState('');
-  const [saving, setSaving] = useState(false);
   
   // Script Generator States
   const [domains, setDomains] = useState<ProtectedDomain[]>([]);
@@ -60,8 +57,6 @@ export function Settings() {
     if (domains.length > 0 && !selectedDomain) {
       const firstDomain = domains[0];
       setSelectedDomain(firstDomain.domain);
-      setCheckoutUrl(firstDomain.settings.checkout_url || `https://${firstDomain.domain}/checkout`);
-      setRedirectUrl(firstDomain.settings.redirect_url || `https://${firstDomain.domain}`);
     }
   }, [domains, selectedDomain]);
 
@@ -215,28 +210,6 @@ export function Settings() {
     }
   };
 
-  const saveCurrentDomainSettings = async () => {
-    if (!selectedDomain) return;
-
-    setSaving(true);
-    try {
-      const domain = domains.find(d => d.domain === selectedDomain);
-      if (!domain) return;
-
-      const newSettings = {
-        ...domain.settings,
-        checkout_url: checkoutUrl,
-        redirect_url: redirectUrl
-      };
-
-      await updateSettings(domain, newSettings);
-    } catch (error) {
-      console.error('Error saving settings:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // Generate obfuscated loader script (WITHOUT sensitive information)
   const generateObfuscatedLoader = (domain?: ProtectedDomain): string => {
     if (domain) {
@@ -275,11 +248,6 @@ export function Settings() {
 
   const handleDomainChange = (domain: string) => {
     setSelectedDomain(domain);
-    const domainData = domains.find(d => d.domain === domain);
-    if (domainData) {
-      setCheckoutUrl(domainData.settings.checkout_url || `https://${domain}/checkout`);
-      setRedirectUrl(domainData.settings.redirect_url || `https://${domain}`);
-    }
   };
 
   const getPlanDisplayName = (plan: string) => {
@@ -549,68 +517,60 @@ export function Settings() {
         </section>
 
         {selectedDomain && (
-          <>
-
-
-            {/* Configuration Block */}
-            <section className="bg-gray-800 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">
-                  Settings for {selectedDomain}
-                </h2>
-                <button
-                  onClick={saveCurrentDomainSettings}
-                  disabled={saving}
-                  className="flex items-center px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {saving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <SaveIcon size={16} className="mr-2" />
-                      Save
-                    </>
-                  )}
-                </button>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Main Checkout Link
-                  </label>
-                  <input 
-                    type="url" 
-                    value={checkoutUrl} 
-                    onChange={e => setCheckoutUrl(e.target.value)} 
-                    placeholder="https://yoursite.com/checkout" 
-                    className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    This URL will be obfuscated in the main script and used to replace checkout links in clones.
-                  </p>
+        {/* Script Usage Instructions */}
+        <section className="bg-gray-800 rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <CodeIcon className="mr-2 text-cyan-400" size={20} />
+            How to Use Your Protection Script
+          </h3>
+          
+          <div className="space-y-4">
+            <div className="bg-gray-750 rounded-lg p-4 border border-gray-600">
+              <h4 className="font-medium text-white mb-2">📋 Step-by-Step Instructions:</h4>
+              <ol className="list-decimal list-inside space-y-2 text-gray-300">
+                <li>Copy the obfuscated script from your protected domain above</li>
+                <li>Open your website's HTML file or template</li>
+                <li>Paste the script in one of these locations:</li>
+              </ol>
+              
+              <div className="mt-3 ml-6 space-y-2">
+                <div className="flex items-start space-x-2">
+                  <span className="text-cyan-400 mt-1">•</span>
+                  <div>
+                    <span className="font-medium text-gray-200">Recommended:</span>
+                    <span className="text-gray-300"> Just before the closing </span>
+                    <code className="bg-gray-600 px-1 py-0.5 rounded text-xs">&lt;/body&gt;</code>
+                    <span className="text-gray-300"> tag</span>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Redirect visitors to this domain
-                  </label>
-                  <input 
-                    type="url" 
-                    value={redirectUrl} 
-                    onChange={e => setRedirectUrl(e.target.value)} 
-                    placeholder="https://yoursite.com" 
-                    className="w-full px-3 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    This URL will be obfuscated in the main script and used to redirect visitors from clones.
-                  </p>
+                <div className="flex items-start space-x-2">
+                  <span className="text-cyan-400 mt-1">•</span>
+                  <div>
+                    <span className="font-medium text-gray-200">Alternative:</span>
+                    <span className="text-gray-300"> Inside the </span>
+                    <code className="bg-gray-600 px-1 py-0.5 rounded text-xs">&lt;head&gt;</code>
+                    <span className="text-gray-300"> section</span>
+                  </div>
                 </div>
               </div>
-            </section>
-          </>
-        )}
+            </div>
+            
+            <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <span className="text-green-400 text-lg">🔐</span>
+                <div>
+                  <h4 className="font-medium text-green-300 mb-1">Security Features:</h4>
+                  <ul className="text-sm text-green-400/80 space-y-1">
+                    <li>• Script is completely obfuscated and secure</li>
+                    <li>• All configurations are hidden from source code</li>
+                    <li>• Protection activates automatically when clones are detected</li>
+                    <li>• No sensitive URLs or data exposed to visitors</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Settings Modal */}
         {showSettings && selectedScriptDomain && (
