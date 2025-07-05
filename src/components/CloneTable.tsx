@@ -131,7 +131,7 @@ export function CloneTable({ detections, loading }: CloneTableProps) {
           <thead>
             <tr className="bg-gray-700">
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
-                Clone Domain
+                Domínio
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">
                 IP / Location
@@ -160,7 +160,7 @@ export function CloneTable({ detections, loading }: CloneTableProps) {
                   <div className="flex items-center">
                     <GlobeIcon size={16} className="text-cyan-400 mr-2" />
                     <div>
-                      <span className="font-medium">{detection.clone_domain}</span>
+                      <span className="font-bold text-white">{detection.clone_domain}</span>
                       {detection.protected_domain && (
                         <div className="text-xs text-gray-400">
                           Original: {detection.protected_domain.domain}
