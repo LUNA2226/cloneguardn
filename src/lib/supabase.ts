@@ -3,11 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Debug environment variables
-console.log('Environment check:');
-console.log('- VITE_SUPABASE_URL:', supabaseUrl || 'MISSING');
-console.log('- VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Present' : 'MISSING');
-
 if (!supabaseUrl || !supabaseAnonKey) {
   const missingVars = [];
   if (!supabaseUrl) missingVars.push('VITE_SUPABASE_URL');
@@ -16,16 +11,34 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(`Missing Supabase environment variables: ${missingVars.join(', ')}`);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Test connection on initialization
-supabase.auth.getSession().then(({ data, error }) => {
-  if (error) {
-    console.error('Supabase connection error:', error);
-  } else {
-    console.log('Supabase connection established successfully');
-    console.log('Session status:', data.session ? 'Active' : 'No session');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'apikey': supabaseAnonKey
+    }
   }
-}).catch(err => {
-  console.error('Failed to test Supabase connection:', err);
 });
+
+// Test connection with better error handling
+const testConnection = async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('Supabase auth session error:', error.message);
+    } else {
+      console.log('Supabase connection established successfully');
+    }
+  } catch (err) {
+    console.error('Failed to connect to Supabase:', err);
+  }
+};
+
+// Only test connection if we're in the browser
+if (typeof window !== 'undefined') {
+  testConnection();
+}
