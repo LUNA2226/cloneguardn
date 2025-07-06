@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Clone Protection Script</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .product {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .price {
+            font-size: 24px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .checkout-btn {
+            background-color: #27ae60;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        .checkout-btn:hover {
+            background-color: #229954;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #e8f5e8;
+            border: 1px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ Test E-commerce Site</h1>
+            <p>This is a test page to verify clone protection script functionality</p>
+        </div>
+
+        <div class="product">
+            <h2>Premium Product</h2>
+            <img src="https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=300" alt="Product Image" style="width: 100%; max-width: 300px; height: 200px; object-fit: cover; border-radius: 5px;">
+            <p>This is an amazing product that everyone wants to buy!</p>
+            <div class="price">$99.99</div>
+            <button class="btn">Add to Cart</button>
+            <button class="btn">View Details</button>
+        </div>
+
+        <div class="product">
+            <h2>Special Offer</h2>
+            <img src="https://images.pexels.com/photos/298863/pexels-photo-298863.jpeg?auto=compress&cs=tinysrgb&w=300" alt="Special Offer" style="width: 100%; max-width: 300px; height: 200px; object-fit: cover; border-radius: 5px;">
+            <p>Limited time offer - don't miss out!</p>
+            <div class="price">$49.99</div>
+            <button class="btn">Add to Cart</button>
+            <a href="/checkout" class="btn checkout-btn">Buy Now - Checkout</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/checkout" class="btn checkout-btn">🛒 Proceed to Checkout</a>
+            <a href="/payment" class="btn checkout-btn">💳 Make Payment</a>
+        </div>
+
+        <div class="status">
+            <h3>🔍 Testing Instructions:</h3>
+            <ol>
+                <li>Copy the protection script from your CloneGuard dashboard</li>
+                <li>Paste it just before the closing &lt;/body&gt; tag below</li>
+                <li>Save this file and open it in a browser</li>
+                <li>Change the domain in the URL bar to simulate a clone</li>
+                <li>Check your CloneGuard dashboard for detection events</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- 
+    PASTE YOUR PROTECTION SCRIPT HERE
+    The script should be placed just before the closing </body> tag
+    
+    Example:
+    <script>
+    (function(){var a='your-script-id';var b=document.createElement('script');b.src='your-supabase-url/functions/v1/script-generator?scriptId='+a;b.async=true;document.head.appendChild(b);})();
+    </script>
+    -->
+
+    <script>
+        // Simulate some user interactions for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded - Domain:', window.location.hostname);
+            
+            // Add click tracking to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    console.log('Button clicked:', this.textContent);
+                    
+                    // Prevent actual navigation for testing
+                    if (this.href || this.textContent.includes('Checkout') || this.textContent.includes('Payment')) {
+                        e.preventDefault();
+                        alert('Checkout/Payment button clicked - this would normally redirect to: ' + (this.href || '/checkout'));
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
